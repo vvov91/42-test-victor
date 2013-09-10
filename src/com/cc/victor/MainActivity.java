@@ -14,6 +14,10 @@ public class MainActivity extends SherlockActivity {
 		
 		getSupportActionBar().setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
 		
+		DbHelper db = new DbHelper(getApplicationContext());
+		db.open();
+		db.close();
+		
 	}
 
 }
