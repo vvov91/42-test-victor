@@ -13,6 +13,7 @@ public class MainActivity extends SherlockActivity {
 		setContentView(R.layout.activity_main);
 		
 		getSupportActionBar().setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
+		
 	}
 
 }
