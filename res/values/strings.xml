@@ -11,5 +11,6 @@
     <string name="bio">Bio:</string>
     <string name="phone">Phone:</string>
     <string name="email">Email:</string>
+    <string name="about_text">Test application\n\n42coffecups\n\nVictor Vovchenko</string>
 
 </resources>
