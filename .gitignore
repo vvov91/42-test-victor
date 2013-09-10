@@ -18,3 +18,10 @@ local.properties
 # Eclipse project files
 .classpath
 .project
+.settings/
+
+# IDEA project files
+.idea
+*.iml
+out/
+proguard/
