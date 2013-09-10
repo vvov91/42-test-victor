@@ -15,7 +15,7 @@ public class TableInfo {
 		.append("CREATE TABLE ").append(TABLE_NAME).append(" (_id INTEGER PRIMARY KEY, ")
 		.append(NAME).append(" TEXT NOT NULL, ")
 		.append(SURNAME).append(" TEXT NOT NULL, ")
-		.append(DATEOFBIRTH).append(" INTEGER, ")
+		.append(DATEOFBIRTH).append(" TEXT, ")
 		.append(BIO).append(" TEXT, ")
 		.append(PHONE).append(" TEXT, ")
 		.append(EMAIL).append(" TEXT);").toString();

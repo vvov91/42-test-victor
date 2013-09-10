@@ -2,6 +2,7 @@ package com.cc.victor;
 
 import android.content.ContentValues;
 import android.content.Context;
+import android.database.Cursor;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteException;
@@ -32,7 +33,7 @@ public class DbHelper extends SQLiteOpenHelper {
 		
 		UserInfo userInfo = new UserInfo(mContext.getString(R.string.val_name),
 				mContext.getString(R.string.val_surname), 
-				Integer.valueOf(mContext.getString(R.string.val_date_of_birth)), 
+				Long.valueOf(mContext.getString(R.string.val_date_of_birth)), 
 				mContext.getString(R.string.val_bio), 
 				mContext.getString(R.string.val_phone), 
 				mContext.getString(R.string.val_email));
@@ -77,6 +78,30 @@ public class DbHelper extends SQLiteOpenHelper {
 			
 			Log.i(Constants.LOG_TAG, "Added entry to database");
 		}
+	}
+	
+	public UserInfo getUserInfo() {
+		UserInfo data = new UserInfo();
+		
+		mDb.beginTransaction();
+		try {
+			Cursor info = mDb.query(TableInfo.TABLE_NAME, null, null, null, null, null, null, "1");
+			if (info.getCount() != 0) {
+				info.moveToFirst();
+
+				data.setName(info.getString(info.getColumnIndex(TableInfo.NAME)));
+				data.setSurname(info.getString(info.getColumnIndex(TableInfo.SURNAME)));
+				data.setDateOfBirth(info.getLong(info.getColumnIndex(TableInfo.DATEOFBIRTH)));
+				data.setBio(info.getString(info.getColumnIndex(TableInfo.BIO)));
+				data.setPhone(info.getString(info.getColumnIndex(TableInfo.PHONE)));
+				data.setEmail(info.getString(info.getColumnIndex(TableInfo.EMAIL)));
+			}
+			info.close();
+		} finally {
+			mDb.endTransaction();
+		}
+		
+		return data;
 	}
 
 }

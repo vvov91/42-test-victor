@@ -4,12 +4,17 @@ public class UserInfo {
 	
 	private String mName;
 	private String mSurname;
-	private int mDateOfBirth;
+	private long mDateOfBirth;
 	private String mBio;
 	private String mPhone;
 	private String mEmail;
 	
-	public UserInfo(String mName, String mSurname, int mDateOfBirth,
+	public UserInfo() {
+		mName = mSurname = mBio = mPhone = mEmail = "";
+		mDateOfBirth = 0L;
+	}
+	
+	public UserInfo(String mName, String mSurname, long mDateOfBirth,
 			String mBio, String mPhone, String mEmail) {
 		this.mName = mName;
 		this.mSurname = mSurname;
@@ -18,7 +23,7 @@ public class UserInfo {
 		this.mPhone = mPhone;
 		this.mEmail = mEmail;
 	}
-
+	
 	public String getName() {
 		return mName;
 	}
@@ -35,11 +40,11 @@ public class UserInfo {
 		this.mSurname = mSurname;
 	}
 
-	public int getDateOfBirth() {
+	public long getDateOfBirth() {
 		return mDateOfBirth;
 	}
 
-	public void setDateOfBirth(int mDateOfBirth) {
+	public void setDateOfBirth(long mDateOfBirth) {
 		this.mDateOfBirth = mDateOfBirth;
 	}
 
