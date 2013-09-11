@@ -14,7 +14,7 @@
         android:layout_alignParentRight="true"
         android:layout_alignParentTop="true"
         android:contentDescription="@string/me"
-        android:src="@drawable/ic_launcher" />
+        android:src="@drawable/photo" />
 
     <TextView
         android:id="@+id/name_text"
