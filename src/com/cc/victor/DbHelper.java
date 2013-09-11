@@ -103,5 +103,24 @@ public class DbHelper extends SQLiteOpenHelper {
 		
 		return data;
 	}
+	
+	public boolean isDbEmpty() {
+		boolean dbIsEmpty = true;
+		
+		mDb.beginTransaction();
+		try {
+			Cursor info = mDb.query(TableInfo.TABLE_NAME, new String[] { TableInfo.NAME },
+					null, null, null, null, null, "1");
+			if (info.getCount() != 0)
+				dbIsEmpty = false;
+			info.close();
+			
+			mDb.setTransactionSuccessful();					
+		} finally {
+			mDb.endTransaction();
+		}
+		
+		return dbIsEmpty;
+	}
 
 }

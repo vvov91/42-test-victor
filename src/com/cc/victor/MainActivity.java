@@ -1,10 +1,20 @@
 package com.cc.victor;
 
 import java.util.ArrayList;
-import com.actionbarsherlock.app.SherlockFragmentActivity;
 
+
+import com.actionbarsherlock.app.SherlockFragmentActivity;
+import com.facebook.Session;
+import com.facebook.SessionState;
+
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
+import android.content.Intent;
+import android.content.SharedPreferences;
+import android.content.SharedPreferences.Editor;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentPagerAdapter;
@@ -19,12 +29,55 @@ public class MainActivity extends SherlockFragmentActivity {
 	private TabHost mTabHost;
 	private ViewPager mViewPager;
 	private TabsAdapter mTabsAdapter;
+	
+	private Session mSession;
+	private Session.StatusCallback statusCallback = new SessionStatusCallback();
+	private String mAuthToken = "";
+	
+	private DbHelper mDb;
+	
+	private SharedPreferences mPrefs;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
+		
+		mPrefs = PreferenceManager.getDefaultSharedPreferences(this);
+		mAuthToken = mPrefs.getString("auth_token", "");
+		
+		if (mAuthToken.equals("")) {
+			facebookLogin();
+			
+			mDb = new DbHelper(this);
+			mDb.open();
+			boolean isDbEmpty = mDb.isDbEmpty();
+			mDb.close();
+			
+			if (isDbEmpty) {
+				facebookGetUserInfo();
+			}
+		} else {
+			loadTabs(savedInstanceState);
+		}
+	}
 
+	@Override
+	protected void onSaveInstanceState(Bundle outState) {
+		super.onSaveInstanceState(outState);
+
+		if (mTabHost != null) 
+			outState.putString("tab", mTabHost.getCurrentTabTag());
+	}
+	
+	@Override
+	public void onActivityResult(int requestCode, int resultCode, Intent data) {
+	    super.onActivityResult(requestCode, resultCode, data);
+	    
+	    mSession.onActivityResult(this, requestCode, resultCode, data);
+	}
+	
+	private void loadTabs(Bundle savedInstanceState) {
 		mTabHost = (TabHost) findViewById(android.R.id.tabhost);
 		mTabHost.setup();
 
@@ -40,12 +93,82 @@ public class MainActivity extends SherlockFragmentActivity {
 			mTabHost.setCurrentTabByTag(savedInstanceState.getString("tab"));
 		}
 	}
+	
+	private void facebookLogin() {
+		mSession = new Session(this);
+		mSession.openForRead(new Session.OpenRequest(this).setCallback(statusCallback));
+	}
+	
+	private void facebookGetUserInfo() {
+		/*Toast.makeText(getApplicationContext(), "Login token: "
+                + session.getAccessToken(), Toast.LENGTH_SHORT).show();
+		
+		if (Session.getActiveSession().isOpened()) {
+			Request.newMeRequest(Session.getActiveSession(), new Request.GraphUserCallback() {
 
-	@Override
-	protected void onSaveInstanceState(Bundle outState) {
-		super.onSaveInstanceState(outState);
-
-		outState.putString("tab", mTabHost.getCurrentTabTag());
+				@Override
+				public void onCompleted(GraphUser user,
+						Response response) {
+					Log.d(Constants.LOG_TAG, "got callback");
+					
+					if (user != null) {
+						Toast.makeText(getApplicationContext(), "Hello "
+                                + user.getName() + "!", Toast.LENGTH_SHORT).show();
+						Toast.makeText(getApplicationContext(), "Login token: "
+                                + session.getAccessToken(), Toast.LENGTH_SHORT).show();
+                    }
+				} 
+				
+			});
+		}*/
+	}
+	
+	private void saveToken(String token) {
+		Editor prefsEditor = mPrefs.edit();
+		prefsEditor.putString("auth_token", token);
+		prefsEditor.commit();
+		
+		mAuthToken = token;
+	}
+	
+	private class SessionStatusCallback implements Session.StatusCallback {
+		
+	    @Override
+	    public void call(Session session, SessionState state, Exception exception) {
+	    	if (state == SessionState.OPENED && mAuthToken.equals("")) {
+	    		saveToken(session.getAccessToken());
+	    		
+	    		loadTabs(null);
+	    	}
+	    	
+	    	if (state == SessionState.CLOSED_LOGIN_FAILED) {
+	    		new AlertDialog.Builder(MainActivity.this)
+	    			.setTitle(R.string.dialog_login)
+	    			.setMessage(R.string.login_failed)
+	    			.setIcon(android.R.drawable.ic_dialog_alert)
+	    			.setPositiveButton(R.string.try_again,
+						new DialogInterface.OnClickListener() {
+					
+							public void onClick(DialogInterface dialog, int which) {
+								dialog.dismiss();
+								
+								facebookLogin();
+							}
+							
+						})
+					.setNegativeButton(R.string.exit, new DialogInterface.OnClickListener() {
+						
+						@Override
+						public void onClick(DialogInterface dialog, int which) {
+							finish();							
+						}
+						
+					})
+					.setCancelable(false)
+					.show();
+	    	}
+	    }
+	    
 	}
 
 	public static class TabsAdapter extends FragmentPagerAdapter implements
@@ -136,6 +259,7 @@ public class MainActivity extends SherlockFragmentActivity {
 		@Override
 		public void onPageScrollStateChanged(int state) {
 		}
+		
 	}
 
 }
