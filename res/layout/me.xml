@@ -94,23 +94,23 @@
         android:textSize="@dimen/bio_text_size" />
 
     <TextView
-        android:id="@+id/phone_text"
+        android:id="@+id/link_text"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
         android:layout_below="@+id/bio_value"
         android:paddingTop="10dp"
-        android:text="@string/phone"
+        android:text="@string/link"
         android:textColor="@color/text_caption"
         android:textSize="@dimen/text_size" />
 
     <TextView
-        android:id="@+id/phone_value"
+        android:id="@+id/link_value"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignBaseline="@+id/phone_text"
-        android:layout_alignBottom="@+id/phone_text"
-        android:layout_toRightOf="@+id/phone_text"
+        android:layout_alignBaseline="@+id/link_text"
+        android:layout_alignBottom="@+id/link_text"
+        android:layout_toRightOf="@+id/link_text"
         android:paddingLeft="5dp"
         android:textColor="@color/text_value"
         android:textSize="@dimen/text_size" />
@@ -120,7 +120,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
-        android:layout_below="@+id/phone_text"
+        android:layout_below="@+id/link_text"
         android:paddingTop="10dp"
         android:text="@string/email"
         android:textColor="@color/text_caption"

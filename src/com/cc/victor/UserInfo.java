@@ -6,21 +6,21 @@ public class UserInfo {
 	private String mSurname;
 	private long mDateOfBirth;
 	private String mBio;
-	private String mPhone;
+	private String mLink;
 	private String mEmail;
 	
 	public UserInfo() {
-		mName = mSurname = mBio = mPhone = mEmail = "";
+		mName = mSurname = mBio = mLink = mEmail = "";
 		mDateOfBirth = 0L;
 	}
 	
 	public UserInfo(String mName, String mSurname, long mDateOfBirth,
-			String mBio, String mPhone, String mEmail) {
+			String mBio, String mLink, String mEmail) {
 		this.mName = mName;
 		this.mSurname = mSurname;
 		this.mDateOfBirth = mDateOfBirth;
 		this.mBio = mBio;
-		this.mPhone = mPhone;
+		this.mLink = mLink;
 		this.mEmail = mEmail;
 	}
 	
@@ -56,12 +56,12 @@ public class UserInfo {
 		this.mBio = mBio;
 	}
 
-	public String getPhone() {
-		return mPhone;
+	public String getLink() {
+		return mLink;
 	}
 
-	public void setPhone(String mPhone) {
-		this.mPhone = mPhone;
+	public void setLink(String mLink) {
+		this.mLink = mLink;
 	}
 
 	public String getEmail() {

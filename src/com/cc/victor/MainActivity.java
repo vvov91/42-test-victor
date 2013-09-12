@@ -1,14 +1,21 @@
 package com.cc.victor;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Locale;
+import java.util.TimeZone;
 
 
 import com.actionbarsherlock.app.SherlockFragmentActivity;
 import com.actionbarsherlock.view.Menu;
-import com.actionbarsherlock.view.MenuInflater;
 import com.actionbarsherlock.view.MenuItem;
+import com.facebook.Request;
+import com.facebook.Response;
 import com.facebook.Session;
 import com.facebook.SessionState;
+import com.facebook.model.GraphUser;
 
 import android.app.AlertDialog;
 import android.content.Context;
@@ -22,9 +29,9 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
-import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ProgressBar;
 import android.widget.TabHost;
 import android.widget.TabWidget;
 
@@ -33,6 +40,7 @@ public class MainActivity extends SherlockFragmentActivity {
 	private TabHost mTabHost;
 	private ViewPager mViewPager;
 	private TabsAdapter mTabsAdapter;
+	private ProgressBar mProgressBar;
 	
 	private Session mSession;
 	private Session.StatusCallback statusCallback = new SessionStatusCallback();
@@ -45,25 +53,21 @@ public class MainActivity extends SherlockFragmentActivity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		setContentView(R.layout.activity_main);
+		setContentView(R.layout.activity_main);		
+
+		mTabHost = (TabHost) findViewById(android.R.id.tabhost);
+		mTabHost.setup();
+		mViewPager = (ViewPager) findViewById(R.id.pager);
+		mProgressBar = (ProgressBar) findViewById(R.id.progressbar);
+
+		if (savedInstanceState != null) {
+			mTabHost.setCurrentTabByTag(savedInstanceState.getString("tab"));
+		}
 		
 		mPrefs = PreferenceManager.getDefaultSharedPreferences(this);
 		mAuthToken = mPrefs.getString("auth_token", "");
 		
-		if (mAuthToken.equals("")) {
-			facebookLogin();
-			
-			mDb = new DbHelper(this);
-			mDb.open();
-			boolean isDbEmpty = mDb.isDbEmpty();
-			mDb.close();
-			
-			if (isDbEmpty) {
-				facebookGetUserInfo();
-			}
-		} else {
-			loadTabs(savedInstanceState);
-		}
+		facebookLogin();
 	}
 
 	@Override
@@ -106,50 +110,57 @@ public class MainActivity extends SherlockFragmentActivity {
 		return super.onMenuItemSelected(featureId, item);
 	}
 	
-	private void loadTabs(Bundle savedInstanceState) {
-		mTabHost = (TabHost) findViewById(android.R.id.tabhost);
-		mTabHost.setup();
-
-		mViewPager = (ViewPager) findViewById(R.id.pager);
-		mTabsAdapter = new TabsAdapter(this, mTabHost, mViewPager);
-
+	private void loadTabs() {
+		mTabsAdapter = new TabsAdapter(this, mTabHost, mViewPager);	
 		mTabsAdapter.addTab(mTabHost.newTabSpec(getString(R.string.me))
 				.setIndicator(getString(R.string.me)), MeFragment.class, null);
 		mTabsAdapter.addTab(mTabHost.newTabSpec(getString(R.string.about))
 				.setIndicator(getString(R.string.about)), AboutFragment.class, null);
-
-		if (savedInstanceState != null) {
-			mTabHost.setCurrentTabByTag(savedInstanceState.getString("tab"));
-		}
 	}
 	
 	private void facebookLogin() {
 		mSession = new Session(this);
-		mSession.openForRead(new Session.OpenRequest(this).setCallback(statusCallback));
+		mSession.openForRead(new Session.OpenRequest(this)
+			.setPermissions(Arrays.asList("email", "user_birthday", "user_about_me"))
+			.setCallback(statusCallback));
 	}
 	
-	private void facebookGetUserInfo() {
-		/*Toast.makeText(getApplicationContext(), "Login token: "
-                + session.getAccessToken(), Toast.LENGTH_SHORT).show();
-		
-		if (Session.getActiveSession().isOpened()) {
-			Request.newMeRequest(Session.getActiveSession(), new Request.GraphUserCallback() {
+	private void facebookGetUserInfo() {		
+		if (mSession.isOpened()) {
+			mProgressBar.setVisibility(View.VISIBLE);
+			
+			Request.newMeRequest(mSession, new Request.GraphUserCallback() {
 
 				@Override
-				public void onCompleted(GraphUser user,
-						Response response) {
-					Log.d(Constants.LOG_TAG, "got callback");
-					
+				public void onCompleted(GraphUser user, Response response) {					
 					if (user != null) {
-						Toast.makeText(getApplicationContext(), "Hello "
-                                + user.getName() + "!", Toast.LENGTH_SHORT).show();
-						Toast.makeText(getApplicationContext(), "Login token: "
-                                + session.getAccessToken(), Toast.LENGTH_SHORT).show();
+						mProgressBar.setVisibility(View.GONE);
+						
+						SimpleDateFormat sdf = new SimpleDateFormat("MM/dd/yyyy", Locale.US);
+						sdf.setTimeZone(TimeZone.getDefault());
+
+						String birthDate = user.getBirthday();
+						long birthDateMs = 0L;
+						try {
+							birthDateMs = sdf.parse(birthDate).getTime();
+						} catch (ParseException e) { }
+						
+						UserInfo info = new UserInfo(user.getFirstName(),
+								user.getLastName(), birthDateMs,
+								user.asMap().get("bio").toString(), user.getLink(),
+								user.asMap().get("email").toString());
+						
+						DbHelper db = new DbHelper(MainActivity.this);
+						db.open();
+						db.addUserInfo(info);
+						db.close();
+						
+						loadTabs();
                     }
 				} 
 				
-			});
-		}*/
+			}).executeAsync();
+		}
 	}
 	
 	private void saveToken(String token) {
@@ -164,10 +175,20 @@ public class MainActivity extends SherlockFragmentActivity {
 		
 	    @Override
 	    public void call(Session session, SessionState state, Exception exception) {
-	    	if (state == SessionState.OPENED && mAuthToken.equals("")) {
-	    		saveToken(session.getAccessToken());
+	    	if (state == SessionState.OPENED) {
+	    		if (mAuthToken.equals(""))
+	    			saveToken(session.getAccessToken());
 	    		
-	    		loadTabs(null);
+	    		mDb = new DbHelper(MainActivity.this);
+	    		mDb.open();
+	    		boolean isDbEmpty = mDb.isDbEmpty();
+	    		mDb.close();
+	    		
+	    		if (isDbEmpty) {
+	    			facebookGetUserInfo();
+	    		} else {
+	    			loadTabs();
+	    		}
 	    	}
 	    	
 	    	if (state == SessionState.CLOSED_LOGIN_FAILED) {

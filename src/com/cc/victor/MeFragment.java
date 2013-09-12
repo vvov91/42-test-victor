@@ -24,7 +24,7 @@ public class MeFragment extends SherlockFragment {
 		TextView surname = (TextView) view.findViewById(R.id.surname_value);
 		TextView dateOfBirth = (TextView) view.findViewById(R.id.date_of_birth_value);
 		TextView bio = (TextView) view.findViewById(R.id.bio_value);
-		TextView phone = (TextView) view.findViewById(R.id.phone_value);
+		TextView link = (TextView) view.findViewById(R.id.link_value);
 		TextView email = (TextView) view.findViewById(R.id.email_value);
 		
 		DbHelper db = new DbHelper(getActivity());
@@ -37,7 +37,7 @@ public class MeFragment extends SherlockFragment {
 		sdf.setTimeZone(TimeZone.getDefault());
 		dateOfBirth.setText(sdf.format(new Date(info.getDateOfBirth())));
 		bio.setText(info.getBio());
-		phone.setText(info.getPhone());
+		link.setText(info.getLink());
 		email.setText(info.getEmail());
 		
 		db.close();

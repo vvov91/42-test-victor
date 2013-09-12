@@ -11,16 +11,13 @@ import android.util.Log;
 
 public class DbHelper extends SQLiteOpenHelper {
 	
-	private final static int DB_VERSION = 1;
+	private final static int DB_VERSION = 2;
 	private final static String DB_NAME = "cc.db";
 	
 	private SQLiteDatabase mDb;
-	private Context mContext;
 
 	public DbHelper(Context context) {
 		super(context, DB_NAME, null, DB_VERSION);
-		
-		mContext = context;
 	}
 
 	@Override
@@ -30,19 +27,17 @@ public class DbHelper extends SQLiteOpenHelper {
 		mDb = db;
 		
 		Log.i(Constants.LOG_TAG, "Database created");
-		
-		UserInfo userInfo = new UserInfo(mContext.getString(R.string.val_name),
-				mContext.getString(R.string.val_surname), 
-				Long.valueOf(mContext.getString(R.string.val_date_of_birth)), 
-				mContext.getString(R.string.val_bio), 
-				mContext.getString(R.string.val_phone), 
-				mContext.getString(R.string.val_email));
-		
-		addUserInfo(userInfo);
 	}
 
 	@Override
-	public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) { }
+	public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+		db.execSQL(TableInfo.DROP_QUERY);
+		db.execSQL(TableInfo.CREATE_QUERY);
+		
+		Log.i(Constants.LOG_TAG,
+				new StringBuilder().append("Database updated from ")
+				.append(oldVersion).append(" to ").append(newVersion).toString());
+	}
 	
 	public void open() throws SQLException {
 		try {
@@ -68,7 +63,7 @@ public class DbHelper extends SQLiteOpenHelper {
 			values.put(TableInfo.SURNAME, data.getSurname());
 			values.put(TableInfo.DATEOFBIRTH, data.getDateOfBirth());
 			values.put(TableInfo.BIO, data.getBio());
-			values.put(TableInfo.PHONE, data.getPhone());
+			values.put(TableInfo.LINK, data.getLink());
 			values.put(TableInfo.EMAIL, data.getEmail());
 			
 			mDb.insert(TableInfo.TABLE_NAME, null, values);
@@ -94,7 +89,7 @@ public class DbHelper extends SQLiteOpenHelper {
 				data.setSurname(info.getString(info.getColumnIndex(TableInfo.SURNAME)));
 				data.setDateOfBirth(info.getLong(info.getColumnIndex(TableInfo.DATEOFBIRTH)));
 				data.setBio(info.getString(info.getColumnIndex(TableInfo.BIO)));
-				data.setPhone(info.getString(info.getColumnIndex(TableInfo.PHONE)));
+				data.setLink(info.getString(info.getColumnIndex(TableInfo.LINK)));
 				data.setEmail(info.getString(info.getColumnIndex(TableInfo.EMAIL)));
 			}
 			info.close();
