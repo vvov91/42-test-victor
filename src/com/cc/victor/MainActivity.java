@@ -155,6 +155,8 @@ public class MainActivity extends SherlockFragmentActivity {
 						db.addUserInfo(info);
 						db.close();
 						
+						saveUserId(user.getId());
+						
 						loadTabs();
                     }
 				} 
@@ -169,6 +171,12 @@ public class MainActivity extends SherlockFragmentActivity {
 		prefsEditor.commit();
 		
 		mAuthToken = token;
+	}
+	
+	private void saveUserId(String userId) {
+		Editor prefsEditor = mPrefs.edit();
+		prefsEditor.putString("user_id", userId);
+		prefsEditor.commit();
 	}
 	
 	private class SessionStatusCallback implements Session.StatusCallback {
@@ -222,7 +230,7 @@ public class MainActivity extends SherlockFragmentActivity {
 	    
 	}
 
-	public static class TabsAdapter extends FragmentPagerAdapter implements
+	private static class TabsAdapter extends FragmentPagerAdapter implements
 			TabHost.OnTabChangeListener, ViewPager.OnPageChangeListener {
 		private final Context mContext;
 		private final TabHost mTabHost;

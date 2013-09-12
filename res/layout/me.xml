@@ -13,8 +13,27 @@
         android:layout_height="128dp"
         android:layout_alignParentRight="true"
         android:layout_alignParentTop="true"
-        android:contentDescription="@string/me"
-        android:src="@drawable/photo" />
+        android:contentDescription="@string/me" />
+
+    <ProgressBar
+        android:id="@+id/photo_progressbar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_marginRight="40dp"
+        android:layout_marginTop="40dp"
+        android:visibility="gone" />
+
+    <Button
+        android:id="@+id/load_photo_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_marginRight="5dp"
+        android:layout_marginTop="40dp"
+        android:onClick="loadPhotoButtonClick"
+        android:text="@string/load_photo"
+        android:visibility="gone" />
 
     <TextView
         android:id="@+id/name_text"

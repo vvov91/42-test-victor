@@ -20,5 +20,6 @@
     <string name="try_again">Try again</string>
     <string name="exit">Exit</string>
     <string name="logout">Logout</string>
+    <string name="load_photo">Load photo</string>
 
 </resources>
