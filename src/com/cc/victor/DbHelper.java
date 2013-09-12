@@ -54,6 +54,7 @@ public class DbHelper extends SQLiteOpenHelper {
 		}
 	}
 	
+	@Override
 	public void close() {
 		mDb.close();
 	}

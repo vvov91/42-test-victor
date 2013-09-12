@@ -4,6 +4,9 @@ import java.util.ArrayList;
 
 
 import com.actionbarsherlock.app.SherlockFragmentActivity;
+import com.actionbarsherlock.view.Menu;
+import com.actionbarsherlock.view.MenuInflater;
+import com.actionbarsherlock.view.MenuItem;
 import com.facebook.Session;
 import com.facebook.SessionState;
 
@@ -19,6 +22,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TabHost;
@@ -73,8 +77,33 @@ public class MainActivity extends SherlockFragmentActivity {
 	@Override
 	public void onActivityResult(int requestCode, int resultCode, Intent data) {
 	    super.onActivityResult(requestCode, resultCode, data);
-	    
+	   
 	    mSession.onActivityResult(this, requestCode, resultCode, data);
+	}
+	    
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		getSupportMenuInflater().inflate(R.menu.activity_main, menu);
+		
+		return super.onCreateOptionsMenu(menu);
+	}
+	
+	@Override
+	public boolean onMenuItemSelected(int featureId, MenuItem item) {
+		switch (item.getItemId()) {
+		case R.id.logout: 
+			if (mSession == null) {
+				mSession = new Session(this);
+			}
+			mSession.closeAndClearTokenInformation();
+			saveToken("");
+			
+			finish();
+			
+			break;
+		}
+		
+		return super.onMenuItemSelected(featureId, item);
 	}
 	
 	private void loadTabs(Bundle savedInstanceState) {
@@ -149,6 +178,7 @@ public class MainActivity extends SherlockFragmentActivity {
 	    			.setPositiveButton(R.string.try_again,
 						new DialogInterface.OnClickListener() {
 					
+							@Override
 							public void onClick(DialogInterface dialog, int which) {
 								dialog.dismiss();
 								

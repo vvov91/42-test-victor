@@ -19,5 +19,6 @@
     <string name="login_failed">Login failed</string>
     <string name="try_again">Try again</string>
     <string name="exit">Exit</string>
+    <string name="logout">Logout</string>
 
 </resources>
