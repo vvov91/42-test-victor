@@ -20,11 +20,14 @@ import com.facebook.model.GraphUser;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.DialogInterface.OnCancelListener;
+import android.content.DialogInterface.OnClickListener;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.provider.Settings;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentPagerAdapter;
@@ -110,6 +113,31 @@ public class MainActivity extends SherlockFragmentActivity {
 		return super.onMenuItemSelected(featureId, item);
 	}
 	
+	private void noConnectionDialog() {
+		new AlertDialog.Builder(MainActivity.this)
+		.setTitle(R.string.connection)
+		.setMessage(R.string.connection_is_out)
+		.setIcon(android.R.drawable.ic_dialog_alert)
+		.setNeutralButton(R.string.connection_settings, new OnClickListener() {
+			
+			@Override
+			public void onClick(DialogInterface dialog, int which) {
+				finish();
+				startActivity(new Intent(Settings.ACTION_WIRELESS_SETTINGS));
+			}
+			
+		})
+		.setOnCancelListener(new OnCancelListener() {
+			
+			@Override
+			public void onCancel(DialogInterface dialog) {
+				finish();
+			}
+			
+		})
+		.show();
+	}
+	
 	private void loadTabs() {
 		mTabsAdapter = new TabsAdapter(this, mTabHost, mViewPager);	
 		mTabsAdapter.addTab(mTabHost.newTabSpec(getString(R.string.me))
@@ -193,7 +221,11 @@ public class MainActivity extends SherlockFragmentActivity {
 	    		mDb.close();
 	    		
 	    		if (isDbEmpty) {
-	    			facebookGetUserInfo();
+	    			if (Functions.isNetworkConnected(getApplicationContext()))
+		    			facebookGetUserInfo();
+	    			else {
+	    				noConnectionDialog();
+	    			}
 	    		} else {
 	    			loadTabs();
 	    		}

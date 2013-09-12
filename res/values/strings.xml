@@ -21,5 +21,9 @@
     <string name="exit">Exit</string>
     <string name="logout">Logout</string>
     <string name="load_photo">Load photo</string>
+    
+    <string name="connection">Connection</string>
+    <string name="connection_is_out">Internet connection is down</string>
+    <string name="connection_settings">Go to Settings</string>
 
 </resources>
