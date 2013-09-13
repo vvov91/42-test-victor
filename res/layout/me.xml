@@ -123,14 +123,16 @@
         android:textColor="@color/text_caption"
         android:textSize="@dimen/text_size" />
 
-    // get user Id from app settings storage
-				SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
-				String userId = prefs.getString("user_id", "");
-				
-				// if Id is present
-				if (!userId.equals(""))
-					// load user photo
-					new DownloadPhoto().execute(userId);
+    <TextView
+        android:id="@+id/link_value"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBaseline="@+id/link_text"
+        android:layout_alignBottom="@+id/link_text"
+        android:layout_toRightOf="@+id/link_text"
+        android:paddingLeft="5dp"
+        android:textColor="@color/text_value"
+        android:textSize="@dimen/text_size" />
 
     <TextView
         android:id="@+id/email_text"
