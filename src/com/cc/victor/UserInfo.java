@@ -1,13 +1,19 @@
 package com.cc.victor;
 
+/**
+ * User information object
+ * 
+ * @author Victor Vovchenko <vitek91@gmail.com>
+ *
+ */
 public class UserInfo {
 	
-	private String mName;
-	private String mSurname;
-	private long mDateOfBirth;
-	private String mBio;
-	private String mLink;
-	private String mEmail;
+	private String mName;								// user first name
+	private String mSurname;							// user last name
+	private long mDateOfBirth;							// date of birth in ms
+	private String mBio;								// bio
+	private String mLink;								// Facebook profile link
+	private String mEmail;								// user's email
 	
 	public UserInfo() {
 		mName = mSurname = mBio = mLink = mEmail = "";

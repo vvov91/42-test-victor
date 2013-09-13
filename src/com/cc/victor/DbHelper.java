@@ -9,10 +9,16 @@ import android.database.sqlite.SQLiteException;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
+/**
+ * Database helper
+ * 
+ * @author Victor Vovchenko <vitek91@gmail.com>
+ *
+ */
 public class DbHelper extends SQLiteOpenHelper {
 	
-	private final static int DB_VERSION = 2;
-	private final static String DB_NAME = "cc.db";
+	private final static int DB_VERSION = 2;					// DB version
+	private final static String DB_NAME = "cc.db";				// DB file
 	
 	private SQLiteDatabase mDb;
 
@@ -31,7 +37,10 @@ public class DbHelper extends SQLiteOpenHelper {
 
 	@Override
 	public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+		// upgrading database
+		// dropping table
 		db.execSQL(TableInfo.DROP_QUERY);
+		// creating it again
 		db.execSQL(TableInfo.CREATE_QUERY);
 		
 		Log.i(Constants.LOG_TAG,
@@ -54,6 +63,11 @@ public class DbHelper extends SQLiteOpenHelper {
 		mDb.close();
 	}
 	
+	/**
+	 * Inserts {@link UserInfo} object into database
+	 * 
+	 * @param data {@link UserInfo} object to insert
+	 */
 	public void addUserInfo(UserInfo data) {
 		ContentValues values = new ContentValues();
 		
@@ -76,6 +90,11 @@ public class DbHelper extends SQLiteOpenHelper {
 		}
 	}
 	
+	/**
+	 * Returns {@link UserInfo} object from database
+	 * 
+	 * @return {@link UserInfo} object with user data
+	 */
 	public UserInfo getUserInfo() {
 		UserInfo data = new UserInfo();
 		
@@ -100,6 +119,11 @@ public class DbHelper extends SQLiteOpenHelper {
 		return data;
 	}
 	
+	/**
+	 * Checks if database has no entries
+	 * 
+	 * @return true if database is empty, false otherwise
+	 */
 	public boolean isDbEmpty() {
 		boolean dbIsEmpty = true;
 		

@@ -4,8 +4,19 @@ import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 
+/**
+ * Basic functions class
+ * 
+ * @author Victor Vovchenko <vitek91@gmail.com>
+ *
+ */
 public class Functions {
 
+	/**
+	 * Checks if network connection is available and connected
+	 * 
+	 * @return true if network connected, false otherwise
+	 */
 	public static boolean isNetworkConnected(Context context) {
 		boolean result = false;
 		

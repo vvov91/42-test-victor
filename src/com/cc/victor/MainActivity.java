@@ -32,12 +32,19 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ProgressBar;
 import android.widget.TabHost;
 import android.widget.TabWidget;
 
+/**
+ * Main activty class
+ * 
+ * @author Victor Vovchenko <vitek91@gmail.com>
+ *
+ */
 public class MainActivity extends SherlockFragmentActivity {
 
 	private TabHost mTabHost;
@@ -47,9 +54,9 @@ public class MainActivity extends SherlockFragmentActivity {
 	
 	private Session mSession;
 	private Session.StatusCallback statusCallback = new SessionStatusCallback();
-	private String mAuthToken = "";
+	private String mAuthToken = "";						// authorization token
 	
-	private DbHelper mDb;
+	private DbHelper mDb;								// database instance
 	
 	private SharedPreferences mPrefs;
 
@@ -67,9 +74,11 @@ public class MainActivity extends SherlockFragmentActivity {
 			mTabHost.setCurrentTabByTag(savedInstanceState.getString("tab"));
 		}
 		
+		// getting auth token from app settings storage
 		mPrefs = PreferenceManager.getDefaultSharedPreferences(this);
 		mAuthToken = mPrefs.getString("auth_token", "");
 		
+		// perform login
 		facebookLogin();
 	}
 
@@ -98,13 +107,22 @@ public class MainActivity extends SherlockFragmentActivity {
 	@Override
 	public boolean onMenuItemSelected(int featureId, MenuItem item) {
 		switch (item.getItemId()) {
-		case R.id.logout: 
+		
+		// on memu "logout" click
+		case R.id.logout:
+			// if session is not started
 			if (mSession == null) {
+				// start new session
 				mSession = new Session(this);
 			}
+			// clear token information
 			mSession.closeAndClearTokenInformation();
+			// save empty token to app settings storage
 			saveToken("");
 			
+			Log.i(Constants.LOG_TAG, "Session cleared, auth token deleted");
+			
+			// exit app
 			finish();
 			
 			break;
@@ -113,6 +131,9 @@ public class MainActivity extends SherlockFragmentActivity {
 		return super.onMenuItemSelected(featureId, item);
 	}
 	
+	/**
+	 * Shows dialog with no network connection error
+	 */
 	private void noConnectionDialog() {
 		new AlertDialog.Builder(MainActivity.this)
 		.setTitle(R.string.connection)
@@ -122,7 +143,9 @@ public class MainActivity extends SherlockFragmentActivity {
 			
 			@Override
 			public void onClick(DialogInterface dialog, int which) {
+				// close app
 				finish();
+				// and open wi-fi settings
 				startActivity(new Intent(Settings.ACTION_WIRELESS_SETTINGS));
 			}
 			
@@ -138,14 +161,24 @@ public class MainActivity extends SherlockFragmentActivity {
 		.show();
 	}
 	
+	/**
+	 * Loads app tabs
+	 */
 	private void loadTabs() {
 		mTabsAdapter = new TabsAdapter(this, mTabHost, mViewPager);	
+
+		// tab with user data 
 		mTabsAdapter.addTab(mTabHost.newTabSpec(getString(R.string.me))
 				.setIndicator(getString(R.string.me)), MeFragment.class, null);
+		
+		// tab with app about info
 		mTabsAdapter.addTab(mTabHost.newTabSpec(getString(R.string.about))
 				.setIndicator(getString(R.string.about)), AboutFragment.class, null);
 	}
 	
+	/**
+	 * Starts new Facebook session
+	 */
 	private void facebookLogin() {
 		mSession = new Session(this);
 		mSession.openForRead(new Session.OpenRequest(this)
@@ -153,6 +186,9 @@ public class MainActivity extends SherlockFragmentActivity {
 			.setCallback(statusCallback));
 	}
 	
+	/**
+	 * Performs request to fetch user data
+	 */
 	private void facebookGetUserInfo() {		
 		if (mSession.isOpened()) {
 			mProgressBar.setVisibility(View.VISIBLE);
@@ -167,6 +203,7 @@ public class MainActivity extends SherlockFragmentActivity {
 						SimpleDateFormat sdf = new SimpleDateFormat("MM/dd/yyyy", Locale.US);
 						sdf.setTimeZone(TimeZone.getDefault());
 
+						// convert bithday date to milliseconds
 						String birthDate = user.getBirthday();
 						long birthDateMs = 0L;
 						try {
@@ -180,11 +217,18 @@ public class MainActivity extends SherlockFragmentActivity {
 						
 						DbHelper db = new DbHelper(MainActivity.this);
 						db.open();
+						
+						// insert data into DB
 						db.addUserInfo(info);
+						
 						db.close();
 						
+						// save user Id in app settings storage
 						saveUserId(user.getId());
 						
+						Log.i(Constants.LOG_TAG, "New user data saved");
+						
+						// load interface
 						loadTabs();
                     }
 				} 
@@ -193,6 +237,11 @@ public class MainActivity extends SherlockFragmentActivity {
 		}
 	}
 	
+	/**
+	 * Saves authorization token to app settings storage
+	 * 
+	 * @param token authorization token
+	 */
 	private void saveToken(String token) {
 		Editor prefsEditor = mPrefs.edit();
 		prefsEditor.putString("auth_token", token);
@@ -201,29 +250,47 @@ public class MainActivity extends SherlockFragmentActivity {
 		mAuthToken = token;
 	}
 	
+	/**
+	 * Saves user Id to app settings storage
+	 * 
+	 * @param userId Facebook user Id
+	 */
 	private void saveUserId(String userId) {
 		Editor prefsEditor = mPrefs.edit();
 		prefsEditor.putString("user_id", userId);
 		prefsEditor.commit();
 	}
 	
+	/**
+	 * Session callback class
+	 */
 	private class SessionStatusCallback implements Session.StatusCallback {
 		
 	    @Override
 	    public void call(Session session, SessionState state, Exception exception) {
+	    	// session is opened 
 	    	if (state == SessionState.OPENED) {
-	    		if (mAuthToken.equals(""))
+	    		// if token is empty
+	    		if (mAuthToken.equals("")) {
+	    			// save current token to storage
 	    			saveToken(session.getAccessToken());
+	    			
+	    			Log.i(Constants.LOG_TAG, "Got new auth token");
+	    		}
 	    		
 	    		mDb = new DbHelper(MainActivity.this);
 	    		mDb.open();
 	    		boolean isDbEmpty = mDb.isDbEmpty();
 	    		mDb.close();
 	    		
+	    		// if database is empty
 	    		if (isDbEmpty) {
+	    			// and if network is up
 	    			if (Functions.isNetworkConnected(getApplicationContext()))
+	    				// retrieve user data
 		    			facebookGetUserInfo();
 	    			else {
+	    				// otherwise tell user to find connection
 	    				noConnectionDialog();
 	    			}
 	    		} else {
@@ -231,6 +298,7 @@ public class MainActivity extends SherlockFragmentActivity {
 	    		}
 	    	}
 	    	
+	    	// authorization failure or another problem
 	    	if (state == SessionState.CLOSED_LOGIN_FAILED) {
 	    		new AlertDialog.Builder(MainActivity.this)
 	    			.setTitle(R.string.dialog_login)
@@ -243,6 +311,7 @@ public class MainActivity extends SherlockFragmentActivity {
 							public void onClick(DialogInterface dialog, int which) {
 								dialog.dismiss();
 								
+								// try to start session again
 								facebookLogin();
 							}
 							
@@ -262,6 +331,9 @@ public class MainActivity extends SherlockFragmentActivity {
 	    
 	}
 
+	/**
+	 * Tabs adapter class
+	 */
 	private static class TabsAdapter extends FragmentPagerAdapter implements
 			TabHost.OnTabChangeListener, ViewPager.OnPageChangeListener {
 		private final Context mContext;

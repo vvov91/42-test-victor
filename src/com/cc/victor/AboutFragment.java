@@ -7,6 +7,12 @@ import android.view.ViewGroup;
 
 import com.actionbarsherlock.app.SherlockFragment;
 
+/**
+ * Fragment with information about application
+ * 
+ * @author Victor Vovchenko <vitek91@gmail.com>
+ *
+ */
 public class AboutFragment extends SherlockFragment {
 
 	@Override

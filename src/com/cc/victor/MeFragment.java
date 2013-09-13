@@ -30,10 +30,16 @@ import android.widget.TextView;
 
 import com.actionbarsherlock.app.SherlockFragment;
 
+/**
+ * Fragment with user data
+ * 
+ * @author Victor Vovchenko <vitek91@gmail.com>
+ *
+ */
 public class MeFragment extends SherlockFragment {
 	
-	private View mView;
-	private String mPhotoPath;
+	private View mView;						// current view
+	private String mPhotoPath;				// path to photo file
 
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -41,18 +47,15 @@ public class MeFragment extends SherlockFragment {
 		mView = inflater.inflate(R.layout.me, container, false);
 				
 		mPhotoPath = Environment.getExternalStorageDirectory() + "/Android/data/" + 
-				getActivity().getPackageName();
-		
+				getActivity().getPackageName();		
 
+		// photo reload button
 		Button loadPhotoButton = (Button) mView.findViewById(R.id.load_photo_button);
 		loadPhotoButton.setOnClickListener(new OnClickListener() {
 			
 			@Override
 			public void onClick(View v) {
-				SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
-				String userId = prefs.getString("user_id", "");
-				if (!userId.equals(""))
-					new DownloadPhoto().execute(userId);
+				startPhotoDownload();
 			}
 			
 		});
@@ -65,6 +68,7 @@ public class MeFragment extends SherlockFragment {
 		TextView link = (TextView) mView.findViewById(R.id.link_value);
 		TextView email = (TextView) mView.findViewById(R.id.email_value);
 		
+		// getting user data from database
 		DbHelper db = new DbHelper(getActivity());
 		db.open();		
 		UserInfo info = db.getUserInfo();		
@@ -80,21 +84,39 @@ public class MeFragment extends SherlockFragment {
 		email.setText(info.getEmail());
 		
 		File photoFile = new File(mPhotoPath + "/photo.jpg");
+		// check if photo file exists
 		if (!photoFile.exists()) {
+			// if not
 			photoFile = new File(mPhotoPath);
+			// make dirs in path to file
 			photoFile.mkdirs();
 			
-			SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
-			String userId = prefs.getString("user_id", "");
-			if (!userId.equals(""))
-				new DownloadPhoto().execute(userId);
+			startPhotoDownload();
 		} else {
+			// if photo already downloaded - display it
 			photo.setImageDrawable(Drawable.createFromPath(mPhotoPath + "/photo.jpg"));
 		}
 
 		return mView;
 	}
 	
+	/**
+	 * Gets user id from app settings storage and downloads user photo
+	 */
+	private void startPhotoDownload() {
+		// get user Id from app settings storage
+		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
+		String userId = prefs.getString("user_id", "");
+		
+		// if Id is present
+		if (!userId.equals(""))
+			// load user photo
+			new DownloadPhoto().execute(userId);
+	}
+	
+	/**
+	 * AsyncTask for user photo downloading
+	 */
 	private class DownloadPhoto extends AsyncTask<String, Integer, Boolean> {
 		
 		private ProgressBar mPhotoProgressBar;
@@ -103,9 +125,11 @@ public class MeFragment extends SherlockFragment {
 		
 		@Override
 		protected void onPreExecute() {	
+			// initalize elements
 			mPhoto = (ImageView) mView.findViewById(R.id.user_photo);
-			mLoadPhotoButton = (Button) mView.findViewById(R.id.load_photo_button);
 			mPhoto.setVisibility(View.GONE);
+			
+			mLoadPhotoButton = (Button) mView.findViewById(R.id.load_photo_button);
 			mLoadPhotoButton.setVisibility(View.GONE);
 			
 			mPhotoProgressBar = (ProgressBar) mView.findViewById(R.id.photo_progressbar);
@@ -131,6 +155,7 @@ public class MeFragment extends SherlockFragment {
 		        while ((count = input.read(data)) != -1) {
 		            total += count;
 
+		            // publish download progress in percents
 		            publishProgress((int) (total * 100) / lenghtOfFile);
 
 		            output.write(data, 0, count);
@@ -146,6 +171,7 @@ public class MeFragment extends SherlockFragment {
 		}
 
 		private void publishProgress(Integer progress) {
+			// display download progress with progressbar
 			mPhotoProgressBar.setProgress(progress);
 		}
 		
