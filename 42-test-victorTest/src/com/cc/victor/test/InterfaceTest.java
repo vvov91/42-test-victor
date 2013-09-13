@@ -1,11 +1,16 @@
 package com.cc.victor.test;
 
+import java.io.File;
+
 import android.app.Activity;
+import android.os.Environment;
 import android.test.ActivityInstrumentationTestCase2;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.cc.victor.DbHelper;
 import com.cc.victor.MainActivity;
+import com.cc.victor.UserInfo;
 
 public class InterfaceTest extends ActivityInstrumentationTestCase2<MainActivity> {
 	
@@ -13,6 +18,8 @@ public class InterfaceTest extends ActivityInstrumentationTestCase2<MainActivity
 	private TextView mNameText;
 	private TextView mSurnameText;
 	private ImageView mPhoto;
+	
+	private DbHelper mDb;
 	
 	public InterfaceTest() { 
 		super(MainActivity.class); 
@@ -26,7 +33,9 @@ public class InterfaceTest extends ActivityInstrumentationTestCase2<MainActivity
 		mNameText = (TextView) mActivity.findViewById(com.cc.victor.R.id.name_value);
 		mSurnameText = (TextView) mActivity.findViewById(com.cc.victor.R.id.surname_value);
 		mPhoto = (ImageView) mActivity.findViewById(com.cc.victor.R.id.user_photo);
-	}
+
+		mDb = new DbHelper(getActivity());
+	}	
 	
 	public void testFieldsCreated() {
 		assertNotNull(mActivity);
@@ -35,19 +44,31 @@ public class InterfaceTest extends ActivityInstrumentationTestCase2<MainActivity
 	}
 	
 	public void testPhotoIsLoaded() {
-		assertNotNull(mPhoto);
+		assertNotNull(mPhoto.getDrawable());
 	}
 	
-	public void testNameIsCorrect() {
-		String expected = getActivity().getString(com.cc.victor.R.string.val_name);
-		
-		assertEquals(expected, mNameText.getText().toString());
+	public void testNameIsNotEmpty() {
+		assertNotSame("", mNameText.getText().toString());
 	}
 	
-	public void testSurnameIsCorrect() {
-		String expected = getActivity().getString(com.cc.victor.R.string.val_surname);
+	public void testSurnameIsNotEmpty() {
+		assertNotSame("", mSurnameText.getText().toString());
+	}
+	
+	public void testDataIsFromDatabase() {
+		mDb.open();
+		UserInfo expected = mDb.getUserInfo();
+		mDb.close();
 		
-		assertEquals(expected, mSurnameText.getText().toString());
+		assertEquals(expected.getName(), mNameText.getText().toString());
+		assertEquals(expected.getSurname(), mSurnameText.getText().toString());
+	}
+	
+	public void testPhotoFileExists() {
+		File photoFile = new File(Environment.getExternalStorageDirectory() + "/Android/data/" + 
+				getActivity().getPackageName() + "/photo.jpg");
+		
+		assertTrue(photoFile.exists());
 	}
 
 }
