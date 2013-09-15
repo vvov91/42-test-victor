@@ -1,5 +1,7 @@
 package com.cc.victor;
 
+import android.os.Environment;
+
 /**
  * Basic constants class
  * 
@@ -9,5 +11,8 @@ package com.cc.victor;
 public class Constants {
 
 	public final static String LOG_TAG = "com.cc.victor";			// logging tag
-	
+	public final static String USER_PHOTO_FILE_PATH = 
+			new StringBuilder().append(Environment.getExternalStorageDirectory())
+			.append("/Android/data/com.cc.victor").toString();
+
 }

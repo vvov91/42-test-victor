@@ -21,7 +21,6 @@ import android.content.SharedPreferences;
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Environment;
 import android.preference.PreferenceManager;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -48,7 +47,6 @@ import com.actionbarsherlock.view.MenuItem;
 public class MeFragment extends SherlockFragment {
 	
 	private View mView;						// current view
-	private String mPhotoPath;				// path to photo file
 	
 	private boolean mEditing;				// flag of editing state
 	
@@ -279,9 +277,6 @@ public class MeFragment extends SherlockFragment {
 	 * Initializes normal view
 	 */
 	private void initStandartView() {
-		mPhotoPath = Environment.getExternalStorageDirectory() + "/Android/data/" + 
-				getActivity().getPackageName();		
-
 		// photo reload button
 		Button loadPhotoButton = (Button) mView.findViewById(R.id.load_photo_button);
 		loadPhotoButton.setOnClickListener(new OnClickListener() {
@@ -314,18 +309,19 @@ public class MeFragment extends SherlockFragment {
 		link.setText(info.getLink());
 		email.setText(info.getEmail());
 		
-		File photoFile = new File(mPhotoPath + "/photo.jpg");
+		File photoFile = new File(Constants.USER_PHOTO_FILE_PATH + "/photo.jpg");
 		// check if photo file exists
 		if (!photoFile.exists()) {
 			// if not
-			photoFile = new File(mPhotoPath);
+			photoFile = new File(Constants.USER_PHOTO_FILE_PATH);
 			// make dirs in path to file
 			photoFile.mkdirs();
 			
 			startPhotoDownload();
 		} else {
 			// if photo already downloaded - display it
-			photo.setImageDrawable(Drawable.createFromPath(mPhotoPath + "/photo.jpg"));
+			photo.setImageDrawable(Drawable.createFromPath(Constants.USER_PHOTO_FILE_PATH
+					+ "/photo.jpg"));
 		}
 	}
 	
@@ -396,7 +392,8 @@ public class MeFragment extends SherlockFragment {
 		        conection.connect();
 		        int lenghtOfFile = conection.getContentLength();
 		        InputStream input = new BufferedInputStream(url.openStream(), 8192);
-		        OutputStream output = new FileOutputStream(mPhotoPath + "/photo.jpg");
+		        OutputStream output = new FileOutputStream(Constants.USER_PHOTO_FILE_PATH 
+		        		+ "/photo.jpg");
 
 		        byte data[] = new byte[1024];
 		        long total = 0;
@@ -432,7 +429,8 @@ public class MeFragment extends SherlockFragment {
 						
 			if (photoDownloaded) {
 				mPhoto.setVisibility(View.VISIBLE);
-				mPhoto.setImageDrawable(Drawable.createFromPath(mPhotoPath + "/photo.jpg"));
+				mPhoto.setImageDrawable(Drawable.createFromPath(Constants.USER_PHOTO_FILE_PATH
+						+ "/photo.jpg"));
 			} else {
 				mLoadPhotoButton.setVisibility(View.VISIBLE);
 			}
