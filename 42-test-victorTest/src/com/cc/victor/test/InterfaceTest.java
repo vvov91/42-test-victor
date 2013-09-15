@@ -5,6 +5,9 @@ import java.io.File;
 import android.app.Activity;
 import android.os.Environment;
 import android.test.ActivityInstrumentationTestCase2;
+import android.test.TouchUtils;
+import android.view.View;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -18,6 +21,8 @@ public class InterfaceTest extends ActivityInstrumentationTestCase2<MainActivity
 	private TextView mNameText;
 	private TextView mSurnameText;
 	private ImageView mPhoto;
+	
+	private View mEditButton;
 	
 	private DbHelper mDb;
 	
@@ -33,6 +38,7 @@ public class InterfaceTest extends ActivityInstrumentationTestCase2<MainActivity
 		mNameText = (TextView) mActivity.findViewById(com.cc.victor.R.id.name_value);
 		mSurnameText = (TextView) mActivity.findViewById(com.cc.victor.R.id.surname_value);
 		mPhoto = (ImageView) mActivity.findViewById(com.cc.victor.R.id.user_photo);
+		mEditButton = (View) mActivity.findViewById(com.cc.victor.R.id.edit);
 
 		mDb = new DbHelper(getActivity());
 	}	
@@ -69,6 +75,13 @@ public class InterfaceTest extends ActivityInstrumentationTestCase2<MainActivity
 				getActivity().getPackageName() + "/photo.jpg");
 		
 		assertTrue(photoFile.exists());
+	}
+	
+	public void testEditModeIsAvailable() {
+		TouchUtils.clickView(this, mEditButton);
+		
+		EditText nameEdit = (EditText) mActivity.findViewById(com.cc.victor.R.id.name_edit);
+		assertNotNull(nameEdit);
 	}
 
 }
