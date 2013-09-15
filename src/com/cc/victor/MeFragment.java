@@ -8,12 +8,15 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URL;
 import java.net.URLConnection;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 import java.util.TimeZone;
 
+import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
@@ -49,13 +52,18 @@ public class MeFragment extends SherlockFragment {
 	
 	private EditText mNameEdit;
 	private EditText mSurnameEdit;
+	private TextView mDateOfBirth;
 	private EditText mBioEdit;
 	private EditText mLinkEdit;
 	private EditText mEmailEdit;
+	
+	private final SimpleDateFormat mSdf = new SimpleDateFormat("dd-MM-yyyy", Locale.US);
 
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
-			Bundle savedInstanceState) {
+			final Bundle savedInstanceState) {
+		mSdf.setTimeZone(TimeZone.getDefault());
+		
 		if (savedInstanceState != null && savedInstanceState.getBoolean("editing")) {
 			mEditing = true;
 			
@@ -63,12 +71,23 @@ public class MeFragment extends SherlockFragment {
 			
 			mNameEdit = (EditText) mView.findViewById(R.id.name_edit);
 			mSurnameEdit = (EditText) mView.findViewById(R.id.surname_edit);
+			mDateOfBirth = (TextView) mView.findViewById(R.id.date_of_birth_value);
+			mDateOfBirth.setOnClickListener(new OnClickListener() {
+				
+				@Override
+				public void onClick(View v) {
+					startActivityForResult(new Intent(getActivity(), DatePickerActivity.class)
+						.putExtra("date", savedInstanceState.getString("dateofbirth")), 0);
+				}
+				
+			});
 			mBioEdit = (EditText) mView.findViewById(R.id.bio_edit);
 			mLinkEdit = (EditText) mView.findViewById(R.id.link_edit);
 			mEmailEdit = (EditText) mView.findViewById(R.id.email_edit);
 
 			mNameEdit.setText(savedInstanceState.getString("name"));
 			mSurnameEdit.setText(savedInstanceState.getString("surname"));
+			mDateOfBirth.setText(savedInstanceState.getString("dateofbirth"));
 			mBioEdit.setText(savedInstanceState.getString("bio"));
 			mLinkEdit.setText(savedInstanceState.getString("link"));
 			mEmailEdit.setText(savedInstanceState.getString("email"));
@@ -107,9 +126,7 @@ public class MeFragment extends SherlockFragment {
 			
 			name.setText(info.getName());
 			surname.setText(info.getSurname());
-			SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy", Locale.US);
-			sdf.setTimeZone(TimeZone.getDefault());
-			dateOfBirth.setText(sdf.format(new Date(info.getDateOfBirth())));
+			dateOfBirth.setText(mSdf.format(new Date(info.getDateOfBirth())));
 			bio.setText(info.getBio());
 			link.setText(info.getLink());
 			email.setText(info.getEmail());
@@ -142,6 +159,7 @@ public class MeFragment extends SherlockFragment {
 	    	outState.putBoolean("editing", mEditing);
 	    	outState.putString("name", mNameEdit.getText().toString());
 	    	outState.putString("surname", mSurnameEdit.getText().toString());
+	    	outState.putString("dateofbirth", mDateOfBirth.getText().toString());
 	    	outState.putString("bio", mBioEdit.getText().toString());
 	    	outState.putString("link", mLinkEdit.getText().toString());
 	    	outState.putString("email", mEmailEdit.getText().toString());
@@ -183,26 +201,45 @@ public class MeFragment extends SherlockFragment {
 		return super.onOptionsItemSelected(item);		
 	}
 	
+	@Override
+	public void onActivityResult(int requestCode, int resultCode, Intent data) {
+		if (resultCode == Activity.RESULT_OK) {
+			((TextView) mView.findViewById(R.id.date_of_birth_value))
+				.setText(mSdf.format(new Date(data.getLongExtra("date", 0))));
+		}
+	}
+	
 	private void switchToEditView() {
 		ViewGroup parent = (ViewGroup) mView.getParent();
 		parent.removeView(mView);
 		mView = ((LayoutInflater) getActivity().getSystemService(Context.LAYOUT_INFLATER_SERVICE))
 				.inflate(R.layout.edit, parent, false);
 		parent.addView(mView);
+				
+		DbHelper db = new DbHelper(getActivity());
+		db.open();		
+		final UserInfo info = db.getUserInfo();		
+		db.close();
 
 		mNameEdit = (EditText) mView.findViewById(R.id.name_edit);
 		mSurnameEdit = (EditText) mView.findViewById(R.id.surname_edit);
+		mDateOfBirth = (TextView) mView.findViewById(R.id.date_of_birth_value);
+		mDateOfBirth.setOnClickListener(new OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {
+				startActivityForResult(new Intent(getActivity(), DatePickerActivity.class)
+					.putExtra("date", mSdf.format(new Date(info.getDateOfBirth()))), 0);
+			}
+			
+		});
 		mBioEdit = (EditText) mView.findViewById(R.id.bio_edit);
 		mLinkEdit = (EditText) mView.findViewById(R.id.link_edit);
-		mEmailEdit = (EditText) mView.findViewById(R.id.email_edit);
-		
-		DbHelper db = new DbHelper(getActivity());
-		db.open();		
-		UserInfo info = db.getUserInfo();		
-		db.close();
+		mEmailEdit = (EditText) mView.findViewById(R.id.email_edit);		
 		
 		mNameEdit.setText(info.getName());
 		mSurnameEdit.setText(info.getSurname());
+		mDateOfBirth.setText(mSdf.format(new Date(info.getDateOfBirth())));
 		mBioEdit.setText(info.getBio());
 		mLinkEdit.setText(info.getLink());
 		mEmailEdit.setText(info.getEmail());
@@ -245,9 +282,7 @@ public class MeFragment extends SherlockFragment {
 		
 		name.setText(info.getName());
 		surname.setText(info.getSurname());
-		SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy", Locale.US);
-		sdf.setTimeZone(TimeZone.getDefault());
-		dateOfBirth.setText(sdf.format(new Date(info.getDateOfBirth())));
+		dateOfBirth.setText(mSdf.format(new Date(info.getDateOfBirth())));
 		bio.setText(info.getBio());
 		link.setText(info.getLink());
 		email.setText(info.getEmail());
@@ -271,6 +306,9 @@ public class MeFragment extends SherlockFragment {
 		UserInfo info = new UserInfo();
 		info.setName(mNameEdit.getText().toString().trim());
 		info.setSurname(mSurnameEdit.getText().toString().trim());
+		try {
+			info.setDateOfBirth(mSdf.parse(mDateOfBirth.getText().toString()).getTime());
+		} catch (ParseException e) { }
 		info.setBio(mBioEdit.getText().toString().trim());
 		info.setLink(mLinkEdit.getText().toString().trim());
 		info.setEmail(mEmailEdit.getText().toString().trim());

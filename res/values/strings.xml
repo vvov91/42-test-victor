@@ -35,4 +35,6 @@
     <string name="link_hint">Facebook link</string>
     <string name="email_hint">your email</string>
     
+    <string name="dateofbitrh_error">You can\'t be born in future, don\'t you? :)</string>
+    
 </resources>
