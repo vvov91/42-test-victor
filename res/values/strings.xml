@@ -36,5 +36,7 @@
     <string name="email_hint">your email</string>
     
     <string name="dateofbitrh_error">You can\'t be born in future, don\'t you? :)</string>
+    <string name="data_input_error">Fill all fields correct</string>
+    <string name="data_saved">Your data successfully saved</string>
     
 </resources>

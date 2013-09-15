@@ -27,11 +27,13 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
+import android.webkit.URLUtil;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.actionbarsherlock.app.SherlockFragment;
 import com.actionbarsherlock.view.Menu;
@@ -48,7 +50,7 @@ public class MeFragment extends SherlockFragment {
 	private View mView;						// current view
 	private String mPhotoPath;				// path to photo file
 	
-	private boolean mEditing;
+	private boolean mEditing;				// flag of editing state
 	
 	private EditText mNameEdit;
 	private EditText mSurnameEdit;
@@ -64,9 +66,11 @@ public class MeFragment extends SherlockFragment {
 			final Bundle savedInstanceState) {
 		mSdf.setTimeZone(TimeZone.getDefault());
 		
+		// if got saved instances and in editing state
 		if (savedInstanceState != null && savedInstanceState.getBoolean("editing")) {
 			mEditing = true;
 			
+			// display editing layout
 			mView = inflater.inflate(R.layout.edit, container, false);
 			
 			mNameEdit = (EditText) mView.findViewById(R.id.name_edit);
@@ -85,6 +89,7 @@ public class MeFragment extends SherlockFragment {
 			mLinkEdit = (EditText) mView.findViewById(R.id.link_edit);
 			mEmailEdit = (EditText) mView.findViewById(R.id.email_edit);
 
+			// set values from previous state
 			mNameEdit.setText(savedInstanceState.getString("name"));
 			mSurnameEdit.setText(savedInstanceState.getString("surname"));
 			mDateOfBirth.setText(savedInstanceState.getString("dateofbirth"));
@@ -92,58 +97,13 @@ public class MeFragment extends SherlockFragment {
 			mLinkEdit.setText(savedInstanceState.getString("link"));
 			mEmailEdit.setText(savedInstanceState.getString("email"));
 		} else {
+			// if in normal state
 			mEditing = false;
 			
+			// display data layout
 			mView = inflater.inflate(R.layout.me, container, false);
 			
-			mPhotoPath = Environment.getExternalStorageDirectory() + "/Android/data/" + 
-					getActivity().getPackageName();		
-
-			// photo reload button
-			Button loadPhotoButton = (Button) mView.findViewById(R.id.load_photo_button);
-			loadPhotoButton.setOnClickListener(new OnClickListener() {
-				
-				@Override
-				public void onClick(View v) {
-					startPhotoDownload();
-				}
-				
-			});
-			
-			ImageView photo = (ImageView) mView.findViewById(R.id.user_photo);
-			TextView name = (TextView) mView.findViewById(R.id.name_value);		
-			TextView surname = (TextView) mView.findViewById(R.id.surname_value);
-			TextView dateOfBirth = (TextView) mView.findViewById(R.id.date_of_birth_value);
-			TextView bio = (TextView) mView.findViewById(R.id.bio_value);
-			TextView link = (TextView) mView.findViewById(R.id.link_value);
-			TextView email = (TextView) mView.findViewById(R.id.email_value);
-			
-			// getting user data from database
-			DbHelper db = new DbHelper(getActivity());
-			db.open();		
-			UserInfo info = db.getUserInfo();		
-			db.close();
-			
-			name.setText(info.getName());
-			surname.setText(info.getSurname());
-			dateOfBirth.setText(mSdf.format(new Date(info.getDateOfBirth())));
-			bio.setText(info.getBio());
-			link.setText(info.getLink());
-			email.setText(info.getEmail());
-			
-			File photoFile = new File(mPhotoPath + "/photo.jpg");
-			// check if photo file exists
-			if (!photoFile.exists()) {
-				// if not
-				photoFile = new File(mPhotoPath);
-				// make dirs in path to file
-				photoFile.mkdirs();
-				
-				startPhotoDownload();
-			} else {
-				// if photo already downloaded - display it
-				photo.setImageDrawable(Drawable.createFromPath(mPhotoPath + "/photo.jpg"));
-			}
+			initStandartView();
 		}
 
 		setHasOptionsMenu(true);
@@ -156,6 +116,7 @@ public class MeFragment extends SherlockFragment {
 	    super.onSaveInstanceState(outState);
 	    
 	    if (mEditing) {
+		    // save input values
 	    	outState.putBoolean("editing", mEditing);
 	    	outState.putString("name", mNameEdit.getText().toString());
 	    	outState.putString("surname", mSurnameEdit.getText().toString());
@@ -180,17 +141,29 @@ public class MeFragment extends SherlockFragment {
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
 		case R.id.edit:
-			if (mEditing) {
-				mEditing = false;
-				
-				saveData();
-				
-				switchToStandartView();
-				
-				item.setTitle(R.string.edit_data);
+			if (mEditing) {			
+				// check if data is correct
+				if (isDataCorrect()) {
+					mEditing = false;
+					
+					// save
+					saveData();
+					
+					// replace layout with new data
+					switchToStandartView();
+					
+					item.setTitle(R.string.edit_data);
+
+					Toast.makeText(getActivity(), 
+							R.string.data_saved, Toast.LENGTH_LONG).show();
+				} else {
+					Toast.makeText(getActivity(), 
+							R.string.data_input_error, Toast.LENGTH_LONG).show();
+				}
 			} else {				
 				mEditing = true;
 				
+				// replace current layout with editing layout
 				switchToEditView();
 				
 				item.setTitle(R.string.save_data);
@@ -204,11 +177,53 @@ public class MeFragment extends SherlockFragment {
 	@Override
 	public void onActivityResult(int requestCode, int resultCode, Intent data) {
 		if (resultCode == Activity.RESULT_OK) {
-			((TextView) mView.findViewById(R.id.date_of_birth_value))
-				.setText(mSdf.format(new Date(data.getLongExtra("date", 0))));
+			// recieve and display new date
+			mDateOfBirth.setText(mSdf.format(new Date(data.getLongExtra("date", 0))));
 		}
 	}
 	
+	/**
+	 * Checks if input data is correct
+	 * 
+	 * @return true if everything ok, false otherwise
+	 */
+	private boolean isDataCorrect() {
+		boolean result = true;
+		
+		// if first name is empty
+		if (mNameEdit.getText().toString().equals("")) {
+			result = false;
+			
+			mNameEdit.setBackgroundColor(getResources().getColor(R.color.edit_text_error));
+		}
+		
+		// if last name is empty
+		if (mSurnameEdit.getText().toString().equals("")) {
+			result = false;
+			
+			mSurnameEdit.setBackgroundColor(getResources().getColor(R.color.edit_text_error));			
+		}
+		
+		// if Facebook link is not correct
+		if (!URLUtil.isValidUrl(mLinkEdit.getText().toString())) {
+			result = false;
+		
+			mLinkEdit.setBackgroundColor(getResources().getColor(R.color.edit_text_error));	
+		}
+		
+		// if email is not correct
+		if (!mEmailEdit.getText().toString().matches("[a-zA-Z0-9._-]+@[a-z]+\\.+[a-z]+")) {
+			result = false;
+		
+			mEmailEdit.setBackgroundColor(getResources().getColor(R.color.edit_text_error));	
+		}
+		
+		return result;
+	}
+	
+	/**
+	 * Replaces current layout with editing layout
+	 */
 	private void switchToEditView() {
 		ViewGroup parent = (ViewGroup) mView.getParent();
 		parent.removeView(mView);
@@ -216,6 +231,7 @@ public class MeFragment extends SherlockFragment {
 				.inflate(R.layout.edit, parent, false);
 		parent.addView(mView);
 				
+		// get user data
 		DbHelper db = new DbHelper(getActivity());
 		db.open();		
 		final UserInfo info = db.getUserInfo();		
@@ -237,6 +253,7 @@ public class MeFragment extends SherlockFragment {
 		mLinkEdit = (EditText) mView.findViewById(R.id.link_edit);
 		mEmailEdit = (EditText) mView.findViewById(R.id.email_edit);		
 		
+		// put user data in editing fields
 		mNameEdit.setText(info.getName());
 		mSurnameEdit.setText(info.getSurname());
 		mDateOfBirth.setText(mSdf.format(new Date(info.getDateOfBirth())));
@@ -245,6 +262,9 @@ public class MeFragment extends SherlockFragment {
 		mEmailEdit.setText(info.getEmail());
 	}
 	
+	/**
+	 * Replaces editing layout with current layout
+	 */
 	private void switchToStandartView() {
 		ViewGroup parent = (ViewGroup) mView.getParent();
 		parent.removeView(mView);
@@ -252,6 +272,13 @@ public class MeFragment extends SherlockFragment {
 				.inflate(R.layout.me, parent, false);
 		parent.addView(mView);
 
+		initStandartView();
+	}
+	
+	/**
+	 * Initializes normal view
+	 */
+	private void initStandartView() {
 		mPhotoPath = Environment.getExternalStorageDirectory() + "/Android/data/" + 
 				getActivity().getPackageName();		
 
@@ -302,6 +329,9 @@ public class MeFragment extends SherlockFragment {
 		}
 	}
 	
+	/**
+	 * Collects input data from editing fields and pastes it into database
+	 */
 	private void saveData() {
 		UserInfo info = new UserInfo();
 		info.setName(mNameEdit.getText().toString().trim());

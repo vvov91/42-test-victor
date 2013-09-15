@@ -3,5 +3,6 @@
     
     <color name="text_caption">#606060</color>
     <color name="text_value">#000000</color>
+    <color name="edit_text_error">#FC6D6D</color>
     
 </resources>
