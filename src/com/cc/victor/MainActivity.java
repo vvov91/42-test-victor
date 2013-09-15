@@ -55,9 +55,7 @@ public class MainActivity extends SherlockFragmentActivity {
 	private Session mSession;
 	private Session.StatusCallback statusCallback = new SessionStatusCallback();
 	private String mAuthToken = "";						// authorization token
-	
-	private DbHelper mDb;								// database instance
-	
+		
 	private SharedPreferences mPrefs;
 	
 	private Bundle mSavedInstanceState = null;
@@ -121,6 +119,11 @@ public class MainActivity extends SherlockFragmentActivity {
 			mSession.closeAndClearTokenInformation();
 			// save empty token to app settings storage
 			saveToken("");
+			
+			DbHelper db = new DbHelper(this);
+			db.open();
+			db.clearDatabase();
+			db.close();
 			
 			Log.i(Constants.LOG_TAG, "Session cleared, auth token deleted");
 			
@@ -284,10 +287,10 @@ public class MainActivity extends SherlockFragmentActivity {
 	    			Log.i(Constants.LOG_TAG, "Got new auth token");
 	    		}
 	    		
-	    		mDb = new DbHelper(MainActivity.this);
-	    		mDb.open();
-	    		boolean isDbEmpty = mDb.isDbEmpty();
-	    		mDb.close();
+	    		DbHelper db = new DbHelper(MainActivity.this);
+	    		db.open();
+	    		boolean isDbEmpty = db.isDbEmpty();
+	    		db.close();
 	    		
 	    		// if database is empty
 	    		if (isDbEmpty) {

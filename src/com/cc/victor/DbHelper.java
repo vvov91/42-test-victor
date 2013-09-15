@@ -161,5 +161,14 @@ public class DbHelper extends SQLiteOpenHelper {
 		
 		return dbIsEmpty;
 	}
+	
+	/**
+	 * Deletes all database content
+	 */
+	public void clearDatabase() {
+		mDb.delete(TableInfo.TABLE_NAME, null, null);
+		
+		Log.i(Constants.LOG_TAG, "Database cleared");
+	}
 
 }
