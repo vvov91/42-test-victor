@@ -3,6 +3,7 @@
 
     <string name="app_name">TestApp</string>
     
+    <!-- Facebook API application ID -->
     <string name="app_id">684812908196284</string>
     
     <string name="me">Me</string>
@@ -13,7 +14,7 @@
     <string name="bio">Bio:</string>
     <string name="link">Link:</string>
     <string name="email">Email:</string>
-    <string name="about_text">Test application\n\n42coffecups\n\nVictor Vovchenko</string>
+    <string name="about_text">Test application\n\n42coffecups\n\nDeveloper: Victor Vovchenko</string>
     
     <string name="dialog_login">Login</string>
     <string name="login_failed">Login failed</string>
