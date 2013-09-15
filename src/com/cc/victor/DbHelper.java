@@ -120,6 +120,25 @@ public class DbHelper extends SQLiteOpenHelper {
 	}
 	
 	/**
+	 * Updates user data with {@link UserInfo}
+	 * 
+	 * @param info {@link UserInfo} object with user data
+	 */
+	public void updateUserInfo(UserInfo info) {
+		ContentValues values = new ContentValues();
+		values.put(TableInfo.NAME, info.getName());
+		values.put(TableInfo.SURNAME, info.getSurname());
+		values.put(TableInfo.DATEOFBIRTH, info.getDateOfBirth());
+		values.put(TableInfo.BIO, info.getBio());
+		values.put(TableInfo.LINK, info.getLink());
+		values.put(TableInfo.EMAIL, info.getEmail());
+
+		mDb.update(TableInfo.TABLE_NAME, values, null, null);
+		
+		Log.i(Constants.LOG_TAG, "User data updated");
+	}
+	
+	/**
 	 * Checks if database has no entries
 	 * 
 	 * @return true if database is empty, false otherwise

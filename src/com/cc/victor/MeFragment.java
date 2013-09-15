@@ -15,7 +15,6 @@ import java.util.TimeZone;
 
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.content.res.Configuration;
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -30,10 +29,8 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.actionbarsherlock.app.SherlockFragment;
-import com.actionbarsherlock.internal.view.menu.MenuWrapper;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
 
@@ -165,13 +162,21 @@ public class MeFragment extends SherlockFragment {
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
 		case R.id.edit:
-			switchToEditView();
-			
-			mEditing = true;
-			
-			item.setTitle(R.string.save_data);
-			
-			Toast.makeText(getActivity(), "edit", Toast.LENGTH_SHORT).show();
+			if (mEditing) {
+				mEditing = false;
+				
+				saveData();
+				
+				switchToStandartView();
+				
+				item.setTitle(R.string.edit_data);
+			} else {				
+				mEditing = true;
+				
+				switchToEditView();
+				
+				item.setTitle(R.string.save_data);
+			}
 			break;
 		}
 		
@@ -201,6 +206,79 @@ public class MeFragment extends SherlockFragment {
 		mBioEdit.setText(info.getBio());
 		mLinkEdit.setText(info.getLink());
 		mEmailEdit.setText(info.getEmail());
+	}
+	
+	private void switchToStandartView() {
+		ViewGroup parent = (ViewGroup) mView.getParent();
+		parent.removeView(mView);
+		mView = ((LayoutInflater) getActivity().getSystemService(Context.LAYOUT_INFLATER_SERVICE))
+				.inflate(R.layout.me, parent, false);
+		parent.addView(mView);
+
+		mPhotoPath = Environment.getExternalStorageDirectory() + "/Android/data/" + 
+				getActivity().getPackageName();		
+
+		// photo reload button
+		Button loadPhotoButton = (Button) mView.findViewById(R.id.load_photo_button);
+		loadPhotoButton.setOnClickListener(new OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {
+				startPhotoDownload();
+			}
+			
+		});
+		
+		ImageView photo = (ImageView) mView.findViewById(R.id.user_photo);
+		TextView name = (TextView) mView.findViewById(R.id.name_value);		
+		TextView surname = (TextView) mView.findViewById(R.id.surname_value);
+		TextView dateOfBirth = (TextView) mView.findViewById(R.id.date_of_birth_value);
+		TextView bio = (TextView) mView.findViewById(R.id.bio_value);
+		TextView link = (TextView) mView.findViewById(R.id.link_value);
+		TextView email = (TextView) mView.findViewById(R.id.email_value);
+		
+		// getting user data from database
+		DbHelper db = new DbHelper(getActivity());
+		db.open();		
+		UserInfo info = db.getUserInfo();		
+		db.close();
+		
+		name.setText(info.getName());
+		surname.setText(info.getSurname());
+		SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy", Locale.US);
+		sdf.setTimeZone(TimeZone.getDefault());
+		dateOfBirth.setText(sdf.format(new Date(info.getDateOfBirth())));
+		bio.setText(info.getBio());
+		link.setText(info.getLink());
+		email.setText(info.getEmail());
+		
+		File photoFile = new File(mPhotoPath + "/photo.jpg");
+		// check if photo file exists
+		if (!photoFile.exists()) {
+			// if not
+			photoFile = new File(mPhotoPath);
+			// make dirs in path to file
+			photoFile.mkdirs();
+			
+			startPhotoDownload();
+		} else {
+			// if photo already downloaded - display it
+			photo.setImageDrawable(Drawable.createFromPath(mPhotoPath + "/photo.jpg"));
+		}
+	}
+	
+	private void saveData() {
+		UserInfo info = new UserInfo();
+		info.setName(mNameEdit.getText().toString().trim());
+		info.setSurname(mSurnameEdit.getText().toString().trim());
+		info.setBio(mBioEdit.getText().toString().trim());
+		info.setLink(mLinkEdit.getText().toString().trim());
+		info.setEmail(mEmailEdit.getText().toString().trim());
+		
+		DbHelper db = new DbHelper(getActivity());
+		db.open();		
+		db.updateUserInfo(info);
+		db.close();
 	}
 	
 	/**
