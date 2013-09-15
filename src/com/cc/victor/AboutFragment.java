@@ -6,12 +6,13 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.actionbarsherlock.app.SherlockFragment;
+import com.actionbarsherlock.view.Menu;
 
 /**
  * Fragment with information about application
  * 
  * @author Victor Vovchenko <vitek91@gmail.com>
- *
+ * 
  */
 public class AboutFragment extends SherlockFragment {
 
@@ -20,7 +21,17 @@ public class AboutFragment extends SherlockFragment {
 			Bundle savedInstanceState) {
 		View view = inflater.inflate(R.layout.about, container, false);
 
+		setHasOptionsMenu(true);
+
 		return view;
 	}
 
+	@Override
+	public void onPrepareOptionsMenu(Menu menu) {
+		menu.findItem(R.id.edit).setVisible(false);
+		menu.findItem(R.id.logout).setVisible(true);
+
+		super.onPrepareOptionsMenu(menu);
+	}
+	
 }

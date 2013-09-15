@@ -25,5 +25,14 @@
     <string name="connection">Connection</string>
     <string name="connection_is_out">Internet connection is down</string>
     <string name="connection_settings">Go to Settings</string>
-
+    
+    <string name="edit_data">Edit</string>
+    <string name="save_data">Save</string>
+    
+    <string name="name_hint">your name</string>
+    <string name="surname_hint">your surname</string>
+    <string name="bio_hint">your bio</string>
+    <string name="link_hint">Facebook link</string>
+    <string name="email_hint">your email</string>
+    
 </resources>

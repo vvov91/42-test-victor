@@ -59,27 +59,29 @@ public class MainActivity extends SherlockFragmentActivity {
 	private DbHelper mDb;								// database instance
 	
 	private SharedPreferences mPrefs;
+	
+	private Bundle mSavedInstanceState = null;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);		
 
+		if (savedInstanceState != null) {
+			mSavedInstanceState = savedInstanceState;
+		}
+
 		mTabHost = (TabHost) findViewById(android.R.id.tabhost);
 		mTabHost.setup();
 		mViewPager = (ViewPager) findViewById(R.id.pager);
 		mProgressBar = (ProgressBar) findViewById(R.id.progressbar);
-
-		if (savedInstanceState != null) {
-			mTabHost.setCurrentTabByTag(savedInstanceState.getString("tab"));
-		}
 		
 		// getting auth token from app settings storage
 		mPrefs = PreferenceManager.getDefaultSharedPreferences(this);
 		mAuthToken = mPrefs.getString("auth_token", "");
 		
 		// perform login
-		facebookLogin();
+		facebookLogin();		
 	}
 
 	@Override
@@ -87,7 +89,7 @@ public class MainActivity extends SherlockFragmentActivity {
 		super.onSaveInstanceState(outState);
 
 		if (mTabHost != null) 
-			outState.putString("tab", mTabHost.getCurrentTabTag());
+			outState.putInt("tab", mTabHost.getCurrentTab());
 	}
 	
 	@Override
@@ -103,7 +105,7 @@ public class MainActivity extends SherlockFragmentActivity {
 		
 		return super.onCreateOptionsMenu(menu);
 	}
-	
+		
 	@Override
 	public boolean onMenuItemSelected(int featureId, MenuItem item) {
 		switch (item.getItemId()) {
@@ -174,6 +176,10 @@ public class MainActivity extends SherlockFragmentActivity {
 		// tab with app about info
 		mTabsAdapter.addTab(mTabHost.newTabSpec(getString(R.string.about))
 				.setIndicator(getString(R.string.about)), AboutFragment.class, null);
+		
+		if (mSavedInstanceState != null) {
+			mTabHost.setCurrentTab(mSavedInstanceState.getInt("tab"));
+		}
 	}
 	
 	/**
