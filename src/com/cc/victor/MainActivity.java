@@ -1,5 +1,6 @@
 package com.cc.victor;
 
+import java.io.File;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -118,12 +119,17 @@ public class MainActivity extends SherlockFragmentActivity {
 			// clear token information
 			mSession.closeAndClearTokenInformation();
 			// save empty token to app settings storage
-			saveToken("");
+			saveToken("");		
 			
+			// clear database
 			DbHelper db = new DbHelper(this);
 			db.open();
 			db.clearDatabase();
 			db.close();
+			
+			// delete user photo
+			File photoFile = new File(Constants.USER_PHOTO_FILE_PATH + "/photo.jpg");
+			photoFile.delete();
 			
 			Log.i(Constants.LOG_TAG, "Session cleared, auth token deleted");
 			
