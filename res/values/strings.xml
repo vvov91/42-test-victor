@@ -14,6 +14,7 @@
     <string name="link">Link:</string>
     <string name="email">Email:</string>
     <string name="about_text">Test application\n\n42coffecups\n\nVictor Vovchenko</string>
+    <string name="not_specified">not specified</string>
     
     <string name="dialog_login">Login</string>
     <string name="login_failed">Login failed</string>

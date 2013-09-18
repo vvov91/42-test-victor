@@ -79,9 +79,15 @@ public class MeFragment extends SherlockFragment {
 		SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy", Locale.US);
 		sdf.setTimeZone(TimeZone.getDefault());
 		dateOfBirth.setText(sdf.format(new Date(info.getDateOfBirth())));
-		bio.setText(info.getBio());
-		link.setText(info.getLink());
-		email.setText(info.getEmail());
+		if (info.getBio().length() == 0)
+			bio.setText(getString(R.string.not_specified));
+		else 
+			bio.setText(info.getBio());			
+		link.setText(info.getLink());		
+		if (info.getEmail().length() == 0)
+			email.setText(getString(R.string.not_specified));
+		else 
+			email.setText(info.getEmail());	
 		
 		File photoFile = new File(mPhotoPath + "/photo.jpg");
 		// check if photo file exists
