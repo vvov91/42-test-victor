@@ -225,10 +225,18 @@ public class MainActivity extends SherlockFragmentActivity {
 							birthDateMs = sdf.parse(birthDate).getTime();
 						} catch (ParseException e) { }
 						
+						String bio = "";
+						String email = "";
+						
+						// check if additional fields are specified
+						if (user.asMap().get("bio") != null) 
+							bio = user.asMap().get("bio").toString();
+						
+						if (user.asMap().get("email") != null)
+							email = user.asMap().get("email").toString();
+						
 						UserInfo info = new UserInfo(user.getFirstName(),
-								user.getLastName(), birthDateMs,
-								user.asMap().get("bio").toString(), user.getLink(),
-								user.asMap().get("email").toString());
+								user.getLastName(), birthDateMs, bio, user.getLink(), email);
 						
 						DbHelper db = new DbHelper(MainActivity.this);
 						db.open();

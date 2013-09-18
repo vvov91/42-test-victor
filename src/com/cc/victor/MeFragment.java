@@ -305,9 +305,15 @@ public class MeFragment extends SherlockFragment {
 		name.setText(info.getName());
 		surname.setText(info.getSurname());
 		dateOfBirth.setText(mSdf.format(new Date(info.getDateOfBirth())));
-		bio.setText(info.getBio());
-		link.setText(info.getLink());
-		email.setText(info.getEmail());
+		if (info.getBio().length() == 0)
+			bio.setText(getString(R.string.not_specified));
+		else 
+			bio.setText(info.getBio());			
+		link.setText(info.getLink());		
+		if (info.getEmail().length() == 0)
+			email.setText(getString(R.string.not_specified));
+		else 
+			email.setText(info.getEmail());	
 		
 		File photoFile = new File(Constants.USER_PHOTO_FILE_PATH + "/photo.jpg");
 		// check if photo file exists
