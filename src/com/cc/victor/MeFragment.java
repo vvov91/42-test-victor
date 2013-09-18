@@ -255,9 +255,15 @@ public class MeFragment extends SherlockFragment {
 		mNameEdit.setText(info.getName());
 		mSurnameEdit.setText(info.getSurname());
 		mDateOfBirth.setText(mSdf.format(new Date(info.getDateOfBirth())));
-		mBioEdit.setText(info.getBio());
-		mLinkEdit.setText(info.getLink());
-		mEmailEdit.setText(info.getEmail());
+		if (info.getBio().length() == 0)
+			mBioEdit.setText(getString(R.string.not_specified));
+		else 
+			mBioEdit.setText(info.getBio());			
+		mLinkEdit.setText(info.getLink());		
+		if (info.getEmail().length() == 0)
+			mEmailEdit.setText(getString(R.string.not_specified));
+		else 
+			mEmailEdit.setText(info.getEmail());	
 	}
 	
 	/**
