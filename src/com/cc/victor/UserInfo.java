@@ -1,7 +1,7 @@
 package com.cc.victor;
 
 /**
- * User information object
+ * User information class
  * 
  * @author Victor Vovchenko <vitek91@gmail.com>
  *

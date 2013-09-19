@@ -130,7 +130,7 @@ public class MainActivity extends SherlockFragmentActivity {
 			// delete user photo
 			File photoFile = new File(Constants.USER_PHOTO_FILE_PATH + "/photo.jpg");
 			photoFile.delete();
-			
+						
 			Log.i(Constants.LOG_TAG, "Session cleared, auth token deleted");
 			
 			// exit app

@@ -10,7 +10,6 @@ import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 import com.nostra13.universalimageloader.cache.disc.impl.UnlimitedDiscCache;
-import com.nostra13.universalimageloader.cache.disc.naming.HashCodeFileNameGenerator;
 import com.nostra13.universalimageloader.cache.memory.impl.LruMemoryCache;
 import com.nostra13.universalimageloader.core.DisplayImageOptions;
 import com.nostra13.universalimageloader.core.ImageLoader;
@@ -40,28 +39,27 @@ public class FriendsListAdapter extends ArrayAdapter<Friend> {
 		
 		File cacheDir = StorageUtils.getCacheDirectory(context);
 		
+		// turn on caching
 		DisplayImageOptions defaultOptions = new DisplayImageOptions.Builder()
         	.cacheInMemory(true)
         	.cacheOnDisc(true)
         	.showStubImage(R.drawable.no_photo)
         	.build();
 		
+		// configuring Universal Image Loader
 		mImageLoaderConfig = new ImageLoaderConfiguration.Builder(context)
 		        .threadPoolSize(5)
 		        .threadPriority(Thread.NORM_PRIORITY - 1)
 		        .tasksProcessingOrder(QueueProcessingType.FIFO)
 		        .denyCacheImageMultipleSizesInMemory()
 		        .memoryCache(new LruMemoryCache(2 * 1024 * 1024))
-		        .memoryCacheSize(2 * 1024 * 1024)
-		        .memoryCacheSizePercentage(13)
 		        .discCache(new UnlimitedDiscCache(cacheDir))
-		        .discCacheFileCount(200)
-		        .discCacheFileNameGenerator(new HashCodeFileNameGenerator())
 		        .imageDownloader(new BaseImageDownloader(context))
 		        .imageDecoder(new BaseImageDecoder(true))
 		        .defaultDisplayImageOptions(defaultOptions)
 		        .build();		
 		
+		// initializing Universal Image Loader
 		if (!ImageLoader.getInstance().isInited())
 			ImageLoader.getInstance().init(mImageLoaderConfig);
 	}
@@ -97,6 +95,7 @@ public class FriendsListAdapter extends ArrayAdapter<Friend> {
 		}
 
 		Friend user = this.getItem(position);
+		
 		viewHolder.name.setText(user.getName());
 		ImageLoader.getInstance().displayImage(
 				"http://graph.facebook.com/" + user.getId() + "/picture", viewHolder.photo);

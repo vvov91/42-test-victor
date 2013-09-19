@@ -9,6 +9,7 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.Settings;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -33,15 +34,14 @@ import com.facebook.model.GraphUser;
  */
 public class FriendsListFragment extends SherlockFragment {
 	
-	private Session mSession;
 	private ArrayList<Friend> mFriends = new ArrayList<Friend>();
 	
-	private FriendsListAdapter mAdapter;
+	private FriendsListAdapter mAdapter;				// list view adapter
 	
-	private ProgressDialog mProgressDialog;
-	private ListView mListView;
-	private TextView mNoFriendsText;
-	private Button mReloadFriendsButton;
+	private ProgressDialog mProgressDialog;				// data processing dialog
+	private ListView mListView;							// list view with friends data
+	private TextView mNoFriendsText;					// no friends text
+	private Button mReloadFriendsButton;				// and data
 
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -51,6 +51,7 @@ public class FriendsListFragment extends SherlockFragment {
 		setHasOptionsMenu(true);
 		
 		if (savedInstanceState != null) {
+			// restore friends list
 			mFriends = savedInstanceState.getParcelableArrayList("friends");
 		}
 		
@@ -62,11 +63,13 @@ public class FriendsListFragment extends SherlockFragment {
 			@Override
 			public void onItemClick(AdapterView<?> arg0, View arg1, int position, long arg3) {
 				try {
+					// try open friend page in native Facebook app
 					getActivity().getPackageManager().getPackageInfo("com.facebook.katana", 0);
 				    startActivity(new Intent(Intent.ACTION_VIEW,
 				    		Uri.parse(new StringBuilder().append("fb://profile/")
 				    				.append(mAdapter.getItem(position).getId()).toString())));
 				} catch (Exception e) {
+					// if app is not installed - go web 
 					startActivity(new Intent(Intent.ACTION_VIEW,
 							Uri.parse(mAdapter.getItem(position).getLink())));
 				}
@@ -91,8 +94,10 @@ public class FriendsListFragment extends SherlockFragment {
     public void setMenuVisibility(final boolean visible) {
         super.setMenuVisibility(visible);
         
+        // if "Friends" tab is displayed
         if (visible) {
-        	if (mFriends.size() == 0) 
+        	// and if friends list is not loaded
+        	if (mFriends.size() == 0)        		
         		getFriendsList();
         }
     }
@@ -109,14 +114,23 @@ public class FriendsListFragment extends SherlockFragment {
 	public void onSaveInstanceState(Bundle outState) {
 	    super.onSaveInstanceState(outState);
 	    
+	    // if already loaded friends list
 	    if (mFriends.size() != 0) {
+	    	// save items
 	    	outState.putParcelableArrayList("friends", mFriends);
 	    }
 	    
 	}
 	
-	private void getFriendsList() {		
+	/**
+	 * Downloads Facebook friends list
+	 */
+	private void getFriendsList() {	
+		Log.i(Constants.LOG_TAG, "Trying to recieve friends list");
+		
+		// if there is no connection
 		if (!Functions.isNetworkConnected(getActivity())) {
+			// show dialog
 			new AlertDialog.Builder(getActivity())
 			.setTitle(R.string.connection)
 			.setMessage(R.string.connection_is_out)
@@ -138,19 +152,21 @@ public class FriendsListFragment extends SherlockFragment {
 			return;
 		}
 		
-		mSession = new Session(getActivity());
-		mSession.openForRead(new Session.OpenRequest(this));
+		// start new session (or reopen existing)
+		Session session = new Session(getActivity());
+		session.openForRead(new Session.OpenRequest(this));
 		
-		if (mSession.isOpened()) {
+		if (session.isOpened()) {
 			mNoFriendsText.setVisibility(View.GONE);
 			mReloadFriendsButton.setVisibility(View.GONE);
 			
+			// show "loading" dialog
 			mProgressDialog = new ProgressDialog(getActivity());
 			mProgressDialog.setMessage(getString(R.string.loading_friends_list));
 			mProgressDialog.setCancelable(false);
 			mProgressDialog.show();
 			
-			Request.newMyFriendsRequest(mSession, new GraphUserListCallback() {
+			Request.newMyFriendsRequest(session, new GraphUserListCallback() {
 				
 				@Override
 				public void onCompleted(List<GraphUser> users, Response response) {
@@ -161,14 +177,21 @@ public class FriendsListFragment extends SherlockFragment {
 		        			mNoFriendsText.setVisibility(View.GONE);
 		        			mReloadFriendsButton.setVisibility(View.GONE);
 		        			
+		        			// save friends list
 		        			mAdapter.clear();
 							for (GraphUser friend : users) {
 								mFriends.add(new Friend(friend.getId(), friend.getName(),
 										friend.getLink()));	
 							}
-			            	mAdapter.notifyDataSetChanged();		        			
+							// notify adapter that friends list have changed
+			            	mAdapter.notifyDataSetChanged();		 			            	
+
+			        		Log.i(Constants.LOG_TAG,
+			        				new StringBuilder().append("Got friend entries (")
+			        				.append(users.size()).append(")").toString());
 		        		}		        				
-					} else {		        				        			
+					} else {	
+						// error while recieving friends list
 						new AlertDialog.Builder(getActivity())
 		    			.setTitle(R.string.get_data)
 		    			.setMessage(R.string.get_friends_error)
@@ -180,6 +203,7 @@ public class FriendsListFragment extends SherlockFragment {
 								public void onClick(DialogInterface dialog, int which) {
 									dialog.dismiss();
 									
+									// try to start again
 									getFriendsList();
 								}
 								

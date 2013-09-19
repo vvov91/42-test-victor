@@ -4,7 +4,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 /**
- * Friend object, parcelable
+ * Friend class, parcelable
  * 
  * @author Victor Vovchenko <vitek91@gmail.com>
  *
