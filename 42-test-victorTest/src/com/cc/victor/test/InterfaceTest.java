@@ -1,6 +1,9 @@
 package com.cc.victor.test;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.Collections;
+
 import android.app.Activity;
 import android.graphics.drawable.Drawable;
 import android.os.Environment;
@@ -13,7 +16,10 @@ import android.widget.TabHost;
 import android.widget.TextView;
 
 import com.cc.victor.DbHelper;
+import com.cc.victor.Friend;
+import com.cc.victor.FriendsListAdapter;
 import com.cc.victor.MainActivity;
+import com.cc.victor.SortByPriority;
 import com.cc.victor.UserInfo;
 
 public class InterfaceTest extends ActivityInstrumentationTestCase2<MainActivity> {
@@ -122,6 +128,44 @@ public class InterfaceTest extends ActivityInstrumentationTestCase2<MainActivity
 		Drawable imageDrawable = image.getDrawable();
 		
 		assertFalse(imageDrawable.equals(noPhotoDrawable));
+	}
+	
+	public void testUserPrioritySorting() {
+		loadFriendsList();
+		
+		ListView listView = (ListView) mActivity.findViewById(com.cc.victor.R.id.friends_listview);
+		
+		if (listView.getCount() > 1) {
+			Friend friend1 = (Friend) listView.getItemAtPosition(0);
+			final Friend friend2 = (Friend) listView.getItemAtPosition(1);
+			
+			final FriendsListAdapter adapter = (FriendsListAdapter) listView.getAdapter();
+			
+			mActivity.runOnUiThread(new Runnable() {
+				
+				@Override
+				public void run() {
+					adapter.remove(friend2);
+					friend2.setPriority(1);
+					adapter.add(friend2);
+					
+					ArrayList<Friend> friends = new ArrayList<Friend>();
+					for (int i = 0; i < adapter.getCount(); i++) {
+						friends.add(adapter.getItem(i));
+					}
+					Collections.sort(friends, new SortByPriority());
+					adapter.clear();
+					adapter.addAll(friends);
+					adapter.notifyDataSetChanged();
+				}
+				
+			});		
+			getInstrumentation().waitForIdleSync();
+			
+			Friend friend3 = (Friend) listView.getItemAtPosition(0);
+			
+			assertNotSame(friend3, friend1);
+		}
 	}
 	
 	private void loadFriendsList() {
