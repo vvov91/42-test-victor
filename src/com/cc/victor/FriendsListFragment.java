@@ -1,16 +1,19 @@
 package com.cc.victor;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ListView;
 import com.actionbarsherlock.app.SherlockFragment;
 import com.actionbarsherlock.view.Menu;
@@ -19,15 +22,6 @@ import com.facebook.Request.GraphUserListCallback;
 import com.facebook.Response;
 import com.facebook.Session;
 import com.facebook.model.GraphUser;
-import com.nostra13.universalimageloader.cache.disc.impl.UnlimitedDiscCache;
-import com.nostra13.universalimageloader.cache.disc.naming.HashCodeFileNameGenerator;
-import com.nostra13.universalimageloader.cache.memory.impl.LruMemoryCache;
-import com.nostra13.universalimageloader.core.DisplayImageOptions;
-import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
-import com.nostra13.universalimageloader.core.assist.QueueProcessingType;
-import com.nostra13.universalimageloader.core.decode.BaseImageDecoder;
-import com.nostra13.universalimageloader.core.download.BaseImageDownloader;
-import com.nostra13.universalimageloader.utils.StorageUtils;
 
 /**
  * Fragment with Facebook friends list
@@ -55,6 +49,22 @@ public class FriendsListFragment extends SherlockFragment {
 		mAdapter = new FriendsListAdapter(getActivity(), mFriends);
 		mListView = (ListView) view.findViewById(R.id.friends_listview);
 		mListView.setAdapter(mAdapter);
+		mListView.setOnItemClickListener(new OnItemClickListener() {
+
+			@Override
+			public void onItemClick(AdapterView<?> arg0, View arg1, int position, long arg3) {
+				try {
+					getActivity().getPackageManager().getPackageInfo("com.facebook.katana", 0);
+				    startActivity(new Intent(Intent.ACTION_VIEW,
+				    		Uri.parse(new StringBuilder().append("fb://profile/")
+				    				.append(mAdapter.getItem(position).getId()).toString())));
+				} catch (Exception e) {
+					startActivity(new Intent(Intent.ACTION_VIEW,
+							Uri.parse(mAdapter.getItem(position).getLink())));
+				}
+			}
+			
+		});
 
 		return view;
 	}
@@ -64,7 +74,8 @@ public class FriendsListFragment extends SherlockFragment {
         super.setMenuVisibility(visible);
         
         if (visible) {
-        	getFriendsList();
+        	if (mFriends.size() == 0) 
+        		getFriendsList();
         }
     }
 

@@ -61,7 +61,6 @@ public class FriendsListAdapter extends ArrayAdapter<GraphUser> {
 		        .imageDownloader(new BaseImageDownloader(context))
 		        .imageDecoder(new BaseImageDecoder(true))
 		        .defaultDisplayImageOptions(defaultOptions)
-		        .writeDebugLogs()
 		        .build();		
 		
 		ImageLoader.getInstance().init(mImageLoaderConfig);
