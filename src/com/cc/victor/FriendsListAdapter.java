@@ -9,7 +9,6 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
-import com.facebook.model.GraphUser;
 import com.nostra13.universalimageloader.cache.disc.impl.UnlimitedDiscCache;
 import com.nostra13.universalimageloader.cache.disc.naming.HashCodeFileNameGenerator;
 import com.nostra13.universalimageloader.cache.memory.impl.LruMemoryCache;
@@ -27,14 +26,14 @@ import com.nostra13.universalimageloader.utils.StorageUtils;
  * @author Victor Vovchenko <vitek91@gmail.com>
  * 
  */
-public class FriendsListAdapter extends ArrayAdapter<GraphUser> {
+public class FriendsListAdapter extends ArrayAdapter<Friend> {
 	
 	private LayoutInflater mInflater;
-	private ArrayList<GraphUser> mUsers = new ArrayList<GraphUser>();
+	private ArrayList<Friend> mUsers = new ArrayList<Friend>();
 	
 	private ImageLoaderConfiguration mImageLoaderConfig;
 	
-	public FriendsListAdapter(Context context, ArrayList<GraphUser> users) {
+	public FriendsListAdapter(Context context, ArrayList<Friend> users) {
 		super(context, R.layout.friends_list_item, users);
 		mUsers = users;
 		mInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
@@ -63,7 +62,8 @@ public class FriendsListAdapter extends ArrayAdapter<GraphUser> {
 		        .defaultDisplayImageOptions(defaultOptions)
 		        .build();		
 		
-		ImageLoader.getInstance().init(mImageLoaderConfig);
+		if (!ImageLoader.getInstance().isInited())
+			ImageLoader.getInstance().init(mImageLoaderConfig);
 	}
 
 	@Override
@@ -72,7 +72,7 @@ public class FriendsListAdapter extends ArrayAdapter<GraphUser> {
 	}
 
 	@Override
-	public GraphUser getItem(int position) {
+	public Friend getItem(int position) {
 		return mUsers.get(position);
 	}
 
@@ -96,7 +96,7 @@ public class FriendsListAdapter extends ArrayAdapter<GraphUser> {
 			viewHolder = (ViewHolder) v.getTag();
 		}
 
-		GraphUser user = this.getItem(position);
+		Friend user = this.getItem(position);
 		viewHolder.name.setText(user.getName());
 		ImageLoader.getInstance().displayImage(
 				"http://graph.facebook.com/" + user.getId() + "/picture", viewHolder.photo);

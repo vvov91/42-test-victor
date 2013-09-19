@@ -2,7 +2,6 @@ package com.cc.victor;
 
 import java.util.ArrayList;
 import java.util.List;
-
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
@@ -35,7 +34,7 @@ import com.facebook.model.GraphUser;
 public class FriendsListFragment extends SherlockFragment {
 	
 	private Session mSession;
-	private ArrayList<GraphUser> mFriends = new ArrayList<GraphUser>();
+	private ArrayList<Friend> mFriends = new ArrayList<Friend>();
 	
 	private FriendsListAdapter mAdapter;
 	
@@ -50,6 +49,10 @@ public class FriendsListFragment extends SherlockFragment {
 		View view = inflater.inflate(R.layout.friends_list, container, false);
 
 		setHasOptionsMenu(true);
+		
+		if (savedInstanceState != null) {
+			mFriends = savedInstanceState.getParcelableArrayList("friends");
+		}
 		
 		mAdapter = new FriendsListAdapter(getActivity(), mFriends);
 		mListView = (ListView) view.findViewById(R.id.friends_listview);
@@ -102,6 +105,16 @@ public class FriendsListFragment extends SherlockFragment {
 		super.onPrepareOptionsMenu(menu);
 	}
 	
+	@Override
+	public void onSaveInstanceState(Bundle outState) {
+	    super.onSaveInstanceState(outState);
+	    
+	    if (mFriends.size() != 0) {
+	    	outState.putParcelableArrayList("friends", mFriends);
+	    }
+	    
+	}
+	
 	private void getFriendsList() {		
 		if (!Functions.isNetworkConnected(getActivity())) {
 			new AlertDialog.Builder(getActivity())
@@ -150,7 +163,8 @@ public class FriendsListFragment extends SherlockFragment {
 		        			
 		        			mAdapter.clear();
 							for (GraphUser friend : users) {
-								mFriends.add(friend);	
+								mFriends.add(new Friend(friend.getId(), friend.getName(),
+										friend.getLink()));	
 							}
 			            	mAdapter.notifyDataSetChanged();		        			
 		        		}		        				
