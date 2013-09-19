@@ -29,6 +29,8 @@
     <string name="connection">Connection</string>
     <string name="connection_is_out">Internet connection is down</string>
     <string name="connection_settings">Go to Settings</string>
+    <string name="get_user_info">Downloading information</string>
+    <string name="get_user_info_error">Error while getting user data</string>
     
     <string name="edit_data">Edit</string>
     <string name="save_data">Save</string>

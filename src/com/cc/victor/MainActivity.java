@@ -154,10 +154,10 @@ public class MainActivity extends SherlockFragmentActivity {
 			
 			@Override
 			public void onClick(DialogInterface dialog, int which) {
-				// close app
-				finish();
-				// and open wi-fi settings
+				// open wi-fi settings
 				startActivity(new Intent(Settings.ACTION_WIRELESS_SETTINGS));
+				// and close app
+				finish();
 			}
 			
 		})
@@ -215,7 +215,38 @@ public class MainActivity extends SherlockFragmentActivity {
 			Request.newMeRequest(mSession, new Request.GraphUserCallback() {
 
 				@Override
-				public void onCompleted(GraphUser user, Response response) {					
+				public void onCompleted(GraphUser user, Response response) {
+					if (response.getError() != null) {
+						mProgressBar.setVisibility(View.GONE);
+						
+						new AlertDialog.Builder(MainActivity.this)
+		    			.setTitle(R.string.get_user_info)
+		    			.setMessage(R.string.get_user_info_error)
+		    			.setIcon(android.R.drawable.ic_dialog_alert)
+		    			.setPositiveButton(R.string.try_again,
+							new DialogInterface.OnClickListener() {
+						
+								@Override
+								public void onClick(DialogInterface dialog, int which) {
+									dialog.dismiss();
+									
+									// try to start session again
+									facebookLogin();
+								}
+								
+							})
+						.setNegativeButton(R.string.exit, new DialogInterface.OnClickListener() {
+							
+							@Override
+							public void onClick(DialogInterface dialog, int which) {
+								finish();							
+							}
+							
+						})
+						.setCancelable(false)
+						.show();
+					}
+					
 					if (user != null) {
 						mProgressBar.setVisibility(View.GONE);
 						
