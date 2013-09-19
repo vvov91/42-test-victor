@@ -180,8 +180,12 @@ public class MainActivity extends SherlockFragmentActivity {
 
 		// tab with user data 
 		mTabsAdapter.addTab(mTabHost.newTabSpec(getString(R.string.me))
-				.setIndicator(getString(R.string.me)), MeFragment.class, null);
-		
+				.setIndicator(getString(R.string.me)), MeFragment.class, null);		
+
+		// tab with friends list
+		mTabsAdapter.addTab(mTabHost.newTabSpec(getString(R.string.about))
+				.setIndicator(getString(R.string.friends)), FriendsListFragment.class, null);
+
 		// tab with app about info
 		mTabsAdapter.addTab(mTabHost.newTabSpec(getString(R.string.about))
 				.setIndicator(getString(R.string.about)), AboutFragment.class, null);
