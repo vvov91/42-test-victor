@@ -68,7 +68,7 @@ public class Friend implements Parcelable {
 		return mPriority;
 	}
 
-	public void setLink(int mPriority) {
+	public void setPriority(int mPriority) {
 		this.mPriority = mPriority;
 	}
 

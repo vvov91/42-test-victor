@@ -51,4 +51,6 @@
     <string name="no_friends">Sorry, your friends list is empty&#8230;</string>
     <string name="reload">Reload</string>
     
+    <string name="user_priority">User priority</string>
+    
 </resources>

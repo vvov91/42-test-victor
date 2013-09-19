@@ -1,6 +1,7 @@
 package com.cc.victor;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
@@ -14,6 +15,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.AdapterView.OnItemClickListener;
@@ -73,6 +75,38 @@ public class FriendsListFragment extends SherlockFragment {
 					startActivity(new Intent(Intent.ACTION_VIEW,
 							Uri.parse(mAdapter.getItem(position).getLink())));
 				}
+			}
+			
+		});
+		// choose priority dialog on long click
+		mListView.setOnItemLongClickListener(new OnItemLongClickListener() {
+
+			@Override
+			public boolean onItemLongClick(AdapterView<?> arg0, View arg1, final int position,
+					long arg3) {
+				new AlertDialog.Builder(getActivity())
+				.setTitle(R.string.user_priority)
+				.setSingleChoiceItems(new String[] { "0",  "1" },
+						// set choosed elem from item
+						mFriends.get(position).getPriority(),
+						new DialogInterface.OnClickListener() {
+
+							@Override
+							public void onClick(DialogInterface dialog,
+									int which) {
+								// change priority
+								mFriends.get(position).setPriority(which);
+
+								// sort friends list
+								Collections.sort(mFriends, new SortByPriority());
+								mAdapter.notifyDataSetChanged();
+								
+								dialog.dismiss();								
+							}
+							
+				}).show();
+				
+				return false;
 			}
 			
 		});
