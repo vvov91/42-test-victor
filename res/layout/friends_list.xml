@@ -3,6 +3,25 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent" >
 
+    <TextView
+        android:id="@+id/no_friends_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:text="@string/no_friends"
+        android:visibility="gone" >
+    </TextView>
+
+    <Button
+        android:id="@+id/reload_friends_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/no_friends_text"
+        android:layout_centerHorizontal="true"
+        android:layout_margin="10dp"
+        android:text="@string/reload"
+        android:visibility="gone" />
+
     <ListView
         android:id="@+id/friends_listview"
         android:layout_width="match_parent"
