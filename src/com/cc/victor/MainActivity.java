@@ -220,7 +220,7 @@ public class MainActivity extends SherlockFragmentActivity {
 						mProgressBar.setVisibility(View.GONE);
 						
 						new AlertDialog.Builder(MainActivity.this)
-		    			.setTitle(R.string.get_user_info)
+		    			.setTitle(R.string.get_data)
 		    			.setMessage(R.string.get_user_info_error)
 		    			.setIcon(android.R.drawable.ic_dialog_alert)
 		    			.setPositiveButton(R.string.try_again,

@@ -25,12 +25,14 @@
     <string name="exit">Exit</string>
     <string name="logout">Logout</string>
     <string name="load_photo">Load photo</string>
+    <string name="loading_friends_list">Loading friends list&#8230;</string>
     
     <string name="connection">Connection</string>
     <string name="connection_is_out">Internet connection is down</string>
     <string name="connection_settings">Go to Settings</string>
-    <string name="get_user_info">Downloading information</string>
+    <string name="get_data">Downloading information</string>
     <string name="get_user_info_error">Error while getting user data</string>
+    <string name="get_friends_error">Error while getting friends list</string>
     
     <string name="edit_data">Edit</string>
     <string name="save_data">Save</string>
@@ -44,5 +46,7 @@
     <string name="dateofbitrh_error">You can\'t be born in future, don\'t you? :)</string>
     <string name="data_input_error">Fill all fields correct</string>
     <string name="data_saved">Your data successfully saved</string>
+    
+    <string name="friend_photo">User photo</string>
     
 </resources>
