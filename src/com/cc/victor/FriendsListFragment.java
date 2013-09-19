@@ -181,7 +181,7 @@ public class FriendsListFragment extends SherlockFragment {
 		        			mAdapter.clear();
 							for (GraphUser friend : users) {
 								mFriends.add(new Friend(friend.getId(), friend.getName(),
-										friend.getLink()));	
+										friend.getLink(), 0));	
 							}
 							// notify adapter that friends list have changed
 			            	mAdapter.notifyDataSetChanged();		 			            	

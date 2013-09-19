@@ -14,26 +14,30 @@ public class Friend implements Parcelable {
 	private String mId;
 	private String mName;
 	private String mLink;
+	private int mPriority;
 	
-	public Friend(String mId, String mName, String mLink) {
+	public Friend(String mId, String mName, String mLink, int mPriority) {
 		this.mId = mId;
 		this.mName = mName;
 		this.mLink = mLink;
+		this.mPriority = mPriority;
 	}
 	
 	public Friend(Parcel in) {
-		String[] data = new String[3];
+		String[] data = new String[4];
 		in.readStringArray(data);
 		
 		mId = data[0];
 		mName = data[1];
 		mLink = data[2];
+		mPriority = Integer.valueOf(data[3]);
 	}
 	
 	public Friend() {
 		this.mId = "";
 		this.mName = "";
 		this.mLink = "";
+		this.mPriority = 0;
 	}
 	
 	public String getId() {
@@ -59,6 +63,14 @@ public class Friend implements Parcelable {
 	public void setLink(String mLink) {
 		this.mLink = mLink;
 	}
+	
+	public int getPriority() {
+		return mPriority;
+	}
+
+	public void setLink(int mPriority) {
+		this.mPriority = mPriority;
+	}
 
 	@Override
 	public int describeContents() {
@@ -67,7 +79,7 @@ public class Friend implements Parcelable {
 	
 	@Override
 	public void writeToParcel(Parcel dest, int flags) {
-		dest.writeStringArray(new String[] { mId, mName, mLink });
+		dest.writeStringArray(new String[] { mId, mName, mLink, String.valueOf(mPriority) });
 	}
 	
 	public static final Parcelable.Creator<Friend> CREATOR = new Parcelable.Creator<Friend>() {
