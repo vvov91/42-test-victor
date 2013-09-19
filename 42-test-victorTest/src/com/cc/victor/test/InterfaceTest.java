@@ -1,14 +1,15 @@
 package com.cc.victor.test;
 
 import java.io.File;
-
 import android.app.Activity;
+import android.graphics.drawable.Drawable;
 import android.os.Environment;
 import android.test.ActivityInstrumentationTestCase2;
 import android.test.TouchUtils;
-import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.ListView;
+import android.widget.TabHost;
 import android.widget.TextView;
 
 import com.cc.victor.DbHelper;
@@ -16,7 +17,7 @@ import com.cc.victor.MainActivity;
 import com.cc.victor.UserInfo;
 
 public class InterfaceTest extends ActivityInstrumentationTestCase2<MainActivity> {
-	
+		
 	private Activity mActivity;
 	private TextView mNameText;
 	private TextView mSurnameText;
@@ -79,7 +80,7 @@ public class InterfaceTest extends ActivityInstrumentationTestCase2<MainActivity
 		final String surname_expected = "test_surname";
 		final String bio_expected = "test bio text";
 		
-		TouchUtils.clickView(this, ((View) mActivity.findViewById(com.cc.victor.R.id.edit)));
+		TouchUtils.clickView(this, mActivity.findViewById(com.cc.victor.R.id.edit));
 		final EditText nameEdit = (EditText) mActivity.findViewById(com.cc.victor.R.id.name_edit);
 		final EditText surnameEdit = (EditText) mActivity.findViewById(com.cc.victor.R.id.surname_edit);
 		final EditText bioEdit = (EditText) mActivity.findViewById(com.cc.victor.R.id.bio_edit);
@@ -93,7 +94,8 @@ public class InterfaceTest extends ActivityInstrumentationTestCase2<MainActivity
 			}
 			
 		});
-		TouchUtils.clickView(this, ((View) mActivity.findViewById(com.cc.victor.R.id.edit)));
+		getInstrumentation().waitForIdleSync();
+		TouchUtils.clickView(this, mActivity.findViewById(com.cc.victor.R.id.edit));
 		
 		mDb.open();
 		UserInfo info = mDb.getUserInfo();
@@ -102,6 +104,42 @@ public class InterfaceTest extends ActivityInstrumentationTestCase2<MainActivity
 		assertEquals(name_expected, info.getName());
 		assertEquals(surname_expected, info.getSurname());
 		assertEquals(bio_expected, info.getBio());
+	}
+	
+	public void testFriendsListLoaded() {
+		loadFriendsList();
+		
+		ListView listView = (ListView) mActivity.findViewById(com.cc.victor.R.id.friends_listview);
+		assertNotSame(0, listView.getCount());
+	}
+	
+	public void testAtLeastOneFriendPhotoIsLoaded() {
+		loadFriendsList();
+		
+		Drawable noPhotoDrawable = 
+				mActivity.getResources().getDrawable(com.cc.victor.R.drawable.no_photo);
+		ImageView image = (ImageView) mActivity.findViewById(com.cc.victor.R.id.friend_photo);
+		Drawable imageDrawable = image.getDrawable();
+		
+		assertFalse(imageDrawable.equals(noPhotoDrawable));
+	}
+	
+	private void loadFriendsList() {
+		final TabHost tabHost = (TabHost) mActivity.findViewById(android.R.id.tabhost);
+		mActivity.runOnUiThread(new Runnable() {
+			
+			@Override
+			public void run() {
+				tabHost.setCurrentTab(1);
+			}
+			
+		});
+		getInstrumentation().waitForIdleSync();
+		
+		// sleep thread to wait while friend list is being loading
+		try {
+			Thread.sleep(3000);
+		} catch (InterruptedException e) { }
 	}
 
 }
